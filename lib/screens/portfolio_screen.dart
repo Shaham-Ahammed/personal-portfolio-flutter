@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/navigation_bar.dart';
 import '../widgets/home_section.dart';
-import '../widgets/skills_section.dart';
+import '../widgets/about_section.dart';
 import '../widgets/projects_section.dart';
 import '../widgets/experience_section.dart';
 import '../widgets/contact_section.dart';
@@ -76,19 +76,19 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
                   child: const HomeSection(),
                 ),
                 SizedBox(
-                  height: MediaQuery.of(context).size.height,
-                  child: const SkillsSection(),
+                  // height: MediaQuery.of(context).size.height,
+                  child: const AboutSection(),
                 ),
                 SizedBox(
-                  height: MediaQuery.of(context).size.height,
+                  // height: MediaQuery.of(context).size.height,
                   child: const ProjectsSection(),
                 ),
                 SizedBox(
-                  height: MediaQuery.of(context).size.height,
+                  // height: MediaQuery.of(context).size.height,
                   child: const ExperienceSection(),
                 ),
                 SizedBox(
-                  height: MediaQuery.of(context).size.height,
+                  // height: MediaQuery.of(context).size.height,
                   child: const ContactSection(),
                 ),
               ],

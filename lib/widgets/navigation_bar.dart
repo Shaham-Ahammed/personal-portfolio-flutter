@@ -54,7 +54,7 @@ class PortfolioNavigationBar extends StatelessWidget {
               ),
               const SizedBox(width: 30),
               _NavItem(
-                label: 'Skills',
+                label: 'About',
                 onTap: () => onSectionTap(1),
                 isActive: currentSection == 1,
               ),
@@ -136,8 +136,8 @@ class PortfolioNavigationBar extends StatelessWidget {
               },
             ),
             _MobileNavItem(
-              label: 'Skills',
-              icon: Icons.code,
+              label: 'About',
+              icon: Icons.person,
               onTap: () {
                 Navigator.pop(context);
                 onSectionTap(1);
