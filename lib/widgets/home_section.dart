@@ -15,8 +15,40 @@ class HomeSection extends StatefulWidget {
   State<HomeSection> createState() => _HomeSectionState();
 }
 
-class _HomeSectionState extends State<HomeSection> {
+class _HomeSectionState extends State<HomeSection>
+    with SingleTickerProviderStateMixin {
   bool _isNameAnimationComplete = false;
+  late final AnimationController _titleController;
+  late final Animation<Offset> _titleSlide;
+  late final Animation<double> _titleOpacity;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    );
+    _titleSlide = Tween<Offset>(
+      begin: const Offset(0.4, 0),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: _titleController,
+        curve: Curves.elasticOut,
+      ),
+    );
+    _titleOpacity = CurvedAnimation(
+      parent: _titleController,
+      curve: Curves.easeOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,17 +100,24 @@ class _HomeSectionState extends State<HomeSection> {
                 style: AppTextStyles.heading1(context),
                 onCompleted: () {
                   setState(() => _isNameAnimationComplete = true);
+                  _titleController.forward();
                 },
               ),
               const SizedBox(height: 16),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(
-                    PortfolioData.title,
-                    style: AppTextStyles.heading3(
-                      context,
-                    ).copyWith(color: AppColors.textSecondary),
+                  FadeTransition(
+                    opacity: _titleOpacity,
+                    child: SlideTransition(
+                      position: _titleSlide,
+                      child: Text(
+                        PortfolioData.title,
+                        style: AppTextStyles.heading3(
+                          context,
+                        ).copyWith(color: AppColors.textSecondary),
+                      ),
+                    ),
                   ),
                   const SizedBox(width: 32),
                   AnimatedOpacity(
@@ -231,6 +270,7 @@ class _HomeSectionState extends State<HomeSection> {
           textAlign: TextAlign.center,
           onCompleted: () {
             setState(() => _isNameAnimationComplete = true);
+            _titleController.forward();
           },
         ),
         const SizedBox(height: 12),
@@ -238,12 +278,18 @@ class _HomeSectionState extends State<HomeSection> {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              PortfolioData.title,
-              style: AppTextStyles.heading3(
-                context,
-              ).copyWith(color: AppColors.textSecondary),
-              textAlign: TextAlign.center,
+            FadeTransition(
+              opacity: _titleOpacity,
+              child: SlideTransition(
+                position: _titleSlide,
+                child: Text(
+                  PortfolioData.title,
+                  style: AppTextStyles.heading3(
+                    context,
+                  ).copyWith(color: AppColors.textSecondary),
+                  textAlign: TextAlign.center,
+                ),
+              ),
             ),
             const SizedBox(width: 10),
             AnimatedOpacity(
