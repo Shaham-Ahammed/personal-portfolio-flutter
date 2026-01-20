@@ -186,8 +186,8 @@ class _HomeSectionState extends State<HomeSection>
                   color: AppColors.background,
                 ),
                 child: ClipOval(
-                  child: Image.network(
-                    PortfolioData.profileImageUrl,
+                  child: Image.asset(
+                    PortfolioData.profileImagePath,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
@@ -238,8 +238,8 @@ class _HomeSectionState extends State<HomeSection>
               color: AppColors.background,
             ),
             child: ClipOval(
-              child: Image.network(
-                PortfolioData.profileImageUrl,
+              child: Image.asset(
+                PortfolioData.profileImagePath,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   return Container(

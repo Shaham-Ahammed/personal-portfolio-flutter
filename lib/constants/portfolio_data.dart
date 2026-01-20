@@ -3,7 +3,7 @@ class PortfolioData {
   // Personal Information
   static const String name = 'Shaham Ahammed';
   static const String title = 'Software Developer';
-  static const String profileImageUrl = 'https://via.placeholder.com/300'; // Replace with your image URL
+  static const String profileImagePath = 'assets/images/profile_image.jpeg'; // Replace with your image path
   static const String quote = 'Code is my canvas, and the screen is my art gallery.';
   static const String bio = 'Passionate developer creating amazing digital experiences.';
   
