@@ -64,7 +64,7 @@ class _AboutSectionState extends State<AboutSection>
               isMobile
                   ? _buildContentBox(context, flareProgress: flareValue)
                   : Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Expanded(
                           flex: 2,
@@ -85,8 +85,8 @@ class _AboutSectionState extends State<AboutSection>
   }
 
   void _tick() {
-    final t = _flareController.lastElapsedDuration?.inMilliseconds.toDouble() ??
-        0.0;
+    final t =
+        _flareController.lastElapsedDuration?.inMilliseconds.toDouble() ?? 0.0;
     final dtMs = (t - _lastT).clamp(0, 32); // clamp to avoid big jumps
     _lastT = t;
     final dt = dtMs / 1000.0;
@@ -139,8 +139,10 @@ class _AboutSectionState extends State<AboutSection>
     });
   }
 
-  Widget _buildContentBox(BuildContext context,
-      {required double flareProgress}) {
+  Widget _buildContentBox(
+    BuildContext context, {
+    required double flareProgress,
+  }) {
     return CustomPaint(
       foregroundPainter: _FlarePainter(
         progress: flareProgress,
@@ -151,8 +153,10 @@ class _AboutSectionState extends State<AboutSection>
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
-          border:
-              Border.all(color: AppColors.primary.withOpacity(0.2), width: 1),
+          border: Border.all(
+            color: AppColors.primary.withOpacity(0.2),
+            width: 1,
+          ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.1),
@@ -271,43 +275,118 @@ class _AboutSectionState extends State<AboutSection>
   }
 }
 
-class _SkillBullet extends StatelessWidget {
+class _SkillBullet extends StatefulWidget {
   const _SkillBullet({required this.name});
 
   final String name;
 
   @override
+  State<_SkillBullet> createState() => _SkillBulletState();
+}
+
+class _SkillBulletState extends State<_SkillBullet>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _shake;
+  final math.Random _rng = math.Random();
+
+  // Track the pill's resting angle so a new shake starts from its last pose.
+  double _restingAngle = 0;
+  // Angle offset applied at the beginning of a shake; set from _restingAngle.
+  double _initialAngle = 0;
+  // Randomized swing direction so first move can go left or right.
+  double _direction = 1;
+  // Live angle updated during the animation.
+  double _currentAngle = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    );
+    _shake = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _triggerShake() {
+    if (_controller.isAnimating) return;
+
+    _direction = _rng.nextBool() ? 1 : -1;
+    _initialAngle = _restingAngle;
+    _controller.forward(from: 0);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: AppColors.primary.withOpacity(0.35),
-          width: 1,
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: _triggerShake,
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedBuilder(
+          animation: _shake,
+          builder: (context, child) {
+            final double progress = _shake.value;
+            // Kids swing effect: pendulum motion with rotation
+            // Exponential decay for natural damping
+            final double decay = math.exp(-progress * 1.2);
+            // Smooth sine wave for pendulum motion (fewer oscillations)
+            final double swing =
+                _direction * math.sin(progress * 2.5 * math.pi) * decay;
+            final double angle = _initialAngle + swing;
+            _currentAngle = angle;
+            if (!_controller.isAnimating) {
+              _restingAngle = angle;
+            }
+            // Horizontal displacement creates the arc
+            final double offsetX = angle * 12;
+            // Rotation angle matches the swing arc (in degrees)
+            final double rotationAngle = angle * 0.15;
+            return Transform.translate(
+              offset: Offset(offsetX, 0),
+              child: Transform.rotate(angle: rotationAngle, child: child),
+            );
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: AppColors.primary.withOpacity(0.35),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 6,
+                  height: 6,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.primaryLight,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  widget.name,
+                  style: AppTextStyles.bodyMedium(context).copyWith(
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 6,
-            height: 6,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.primaryLight,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            name,
-            style: AppTextStyles.bodyMedium(context).copyWith(
-              color: AppColors.textSecondary,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
       ),
     );
   }
