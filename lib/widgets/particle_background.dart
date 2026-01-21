@@ -64,7 +64,7 @@ class _ParticleBackgroundState extends State<ParticleBackground>
     }
     for (final index in selectedIndices) {
       _particles[index] = _particles[index].copyWith(
-        color: AppColors.accent.withOpacity(0.6),
+        color: AppColors.accent.withValues(alpha: 0.6),
       );
     }
   }
@@ -150,7 +150,7 @@ class Particle {
       vx: (random.nextDouble() - 0.5) * 0.25,
       vy: (random.nextDouble() - 0.5) * 0.25,
       radius: random.nextDouble() * 2 + 1,
-      color: AppColors.primaryLight.withOpacity(
+      color: AppColors.primaryLight.withValues(alpha:
         random.nextDouble() * 0.5 + 0.2,
       ),
     );
@@ -232,14 +232,14 @@ class ParticlePainter extends CustomPainter {
     // Small cursor halo (for enabled contexts)
     if (showCursorHalo && mousePosition != null) {
       final haloPaint = Paint()
-        ..color = AppColors.primaryLight.withOpacity(0.18)
+        ..color = AppColors.primaryLight.withValues(alpha: 0.18)
         ..style = PaintingStyle.fill
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12);
 
       canvas.drawCircle(mousePosition!, 24, haloPaint);
 
       final strokePaint = Paint()
-        ..color = AppColors.primaryLight.withOpacity(0.5)
+        ..color = AppColors.primaryLight.withValues(alpha: 0.5)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.2;
 
@@ -261,7 +261,7 @@ class ParticlePainter extends CustomPainter {
 
         if (distance < connectionDistance) {
           final opacity = (1 - distance / connectionDistance) * 0.3;
-          paint.color = AppColors.primaryLight.withOpacity(opacity);
+          paint.color = AppColors.primaryLight.withValues(alpha: opacity);
           canvas.drawLine(
             Offset(p1.x, p1.y),
             Offset(p2.x, p2.y),
@@ -285,7 +285,7 @@ class ParticlePainter extends CustomPainter {
 
       // Add glow effect
       final glowPaint = Paint()
-        ..color = particle.color.withOpacity(0.3)
+        ..color = particle.color.withValues(alpha: 0.3)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
 
       canvas.drawCircle(

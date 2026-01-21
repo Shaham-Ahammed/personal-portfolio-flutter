@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:characters/characters.dart';
 import '../constants/colors.dart';
 import '../constants/images.dart';
 import '../constants/text_styles.dart';
@@ -136,7 +135,7 @@ class _HomeSectionState extends State<HomeSection>
                   color: AppColors.surface,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: AppColors.primary.withOpacity(0.3),
+                    color: AppColors.primary.withValues(alpha: 0.3),
                     width: 1,
                   ),
                 ),
@@ -173,7 +172,7 @@ class _HomeSectionState extends State<HomeSection>
                 gradient: AppColors.primaryGradient,
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primary.withOpacity(0.5),
+                    color: AppColors.primary.withValues(alpha: 0.5),
                     blurRadius: 40,
                     spreadRadius: 10,
                   ),
@@ -225,7 +224,7 @@ class _HomeSectionState extends State<HomeSection>
             gradient: AppColors.primaryGradient,
             boxShadow: [
               BoxShadow(
-                color: AppColors.primary.withOpacity(0.5),
+                color: AppColors.primary.withValues(alpha: 0.5),
                 blurRadius: 30,
                 spreadRadius: 5,
               ),
@@ -309,7 +308,7 @@ class _HomeSectionState extends State<HomeSection>
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: AppColors.primary.withOpacity(0.3),
+              color: AppColors.primary.withValues(alpha: 0.3),
               width: 1,
             ),
           ),

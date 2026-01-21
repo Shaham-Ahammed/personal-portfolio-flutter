@@ -28,10 +28,10 @@ class PortfolioNavigationBar extends StatelessWidget {
       height: 80,
       padding: const EdgeInsets.symmetric(horizontal: 40),
       decoration: BoxDecoration(
-        color: AppColors.background.withOpacity(0.9),
+        color: AppColors.background.withValues(alpha: 0.9),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
           ),
         ],
@@ -88,10 +88,10 @@ class PortfolioNavigationBar extends StatelessWidget {
       height: 70,
       padding: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
-        color: AppColors.background.withOpacity(0.9),
+        color: AppColors.background.withValues(alpha: 0.9),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
           ),
         ],
@@ -209,7 +209,7 @@ class _NavItemState extends State<_NavItem> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: isActive ? AppColors.primary.withOpacity(0.2) : Colors.transparent,
+              color: isActive ? AppColors.primary.withValues(alpha: 0.2) : Colors.transparent,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(

@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:visibility_detector/visibility_detector.dart';
 import 'package:personal_portfoliio/constants/images.dart';
 
 import '../constants/colors.dart';
@@ -20,7 +19,6 @@ class _AboutSectionState extends State<AboutSection>
   late final AnimationController _flareController;
   late final List<_FlareParticle> _particles;
   double _lastT = 0;
-  bool _isVisible = true;
 
   @override
   void initState() {
@@ -44,56 +42,44 @@ class _AboutSectionState extends State<AboutSection>
     final size = MediaQuery.of(context).size;
     final isMobile = size.width < 768;
 
-    return VisibilityDetector(
-      key: const Key('about-section-visibility'),
-      onVisibilityChanged: (info) {
-        final nowVisible = info.visibleFraction > 0;
-        if (_isVisible != nowVisible) {
-          setState(() => _isVisible = nowVisible);
-        }
-      },
-      child: Container(
-        width: double.infinity,
-        constraints: BoxConstraints(minHeight: size.height),
-        color: AppColors.backgroundLight,
-        padding: EdgeInsets.symmetric(
-          horizontal: isMobile ? 20 : 60,
-          vertical: isMobile ? 60 : 100,
-        ),
-        child: AnimatedBuilder(
-          animation: _flareController,
-          builder: (context, _) {
-            final flareValue = _flareController.value;
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('ABOUT', style: AppTextStyles.sectionTitle(context)),
-                const SizedBox(height: 16),
-                Text('Who I Am', style: AppTextStyles.heading2(context)),
-                const SizedBox(height: 40),
-                isMobile
-                    ? _buildContentBox(
-                        context,
-                        flareProgress: flareValue,
-                      )
-                    : Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            flex: 2,
-                            child: _buildContentBox(
-                              context,
-                              flareProgress: flareValue,
-                            ),
+    return Container(
+      width: double.infinity,
+      constraints: BoxConstraints(minHeight: size.height),
+      color: AppColors.backgroundLight,
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 20 : 60,
+        vertical: isMobile ? 60 : 100,
+      ),
+      child: AnimatedBuilder(
+        animation: _flareController,
+        builder: (context, _) {
+          final flareValue = _flareController.value;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('ABOUT', style: AppTextStyles.sectionTitle(context)),
+              const SizedBox(height: 16),
+              Text('Who I Am', style: AppTextStyles.heading2(context)),
+              const SizedBox(height: 40),
+              isMobile
+                  ? _buildContentBox(context, flareProgress: flareValue)
+                  : Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: _buildContentBox(
+                            context,
+                            flareProgress: flareValue,
                           ),
-                          const SizedBox(width: 60),
-                          Expanded(flex: 1, child: _buildGifContainer(context)),
-                        ],
-                      ),
-              ],
-            );
-          },
-        ),
+                        ),
+                        const SizedBox(width: 60),
+                        Expanded(flex: 1, child: _buildGifContainer(context)),
+                      ],
+                    ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -168,12 +154,12 @@ class _AboutSectionState extends State<AboutSection>
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: AppColors.primary.withOpacity(0.2),
+            color: AppColors.primary.withValues(alpha: 0.2),
             width: 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 20,
               offset: const Offset(0, 8),
             ),
@@ -201,10 +187,7 @@ class _AboutSectionState extends State<AboutSection>
               runSpacing: 12,
               children: [
                 for (final skillMap in PortfolioData.skills)
-                  _SkillBullet(
-                    name: skillMap['name'] as String,
-                    isSectionVisible: _isVisible,
-                  ),
+                  _SkillBullet(name: skillMap['name'] as String),
               ],
             ),
           ],
@@ -231,7 +214,7 @@ class _AboutSectionState extends State<AboutSection>
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: AppColors.primary.withOpacity(0.4),
+                    color: AppColors.primary.withValues(alpha: 0.4),
                     width: 3,
                   ),
                   color: Colors.transparent,
@@ -246,12 +229,12 @@ class _AboutSectionState extends State<AboutSection>
                 borderRadius: BorderRadius.circular(20),
                 color: Colors.black,
                 border: Border.all(
-                  color: AppColors.primary.withOpacity(0.2),
+                  color: AppColors.primary.withValues(alpha: 0.2),
                   width: 1,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.18),
+                    color: Colors.black.withValues(alpha: 0.18),
                     blurRadius: 20,
                     offset: const Offset(0, 8),
                   ),
@@ -269,7 +252,7 @@ class _AboutSectionState extends State<AboutSection>
                         color: AppColors.surface,
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: AppColors.primary.withOpacity(0.2),
+                          color: AppColors.primary.withValues(alpha: 0.2),
                           width: 1,
                         ),
                       ),
@@ -293,13 +276,9 @@ class _AboutSectionState extends State<AboutSection>
 }
 
 class _SkillBullet extends StatefulWidget {
-  const _SkillBullet({
-    required this.name,
-    required this.isSectionVisible,
-  });
+  const _SkillBullet({required this.name});
 
   final String name;
-  final bool isSectionVisible;
 
   @override
   State<_SkillBullet> createState() => _SkillBulletState();
@@ -318,7 +297,7 @@ class _SkillBulletState extends State<_SkillBullet>
   // Randomized swing direction so first move can go left or right.
   double _direction = 1;
   // Live angle updated during the animation.
-  double _currentAngle = 0;
+  // double _currentAngle = 0;
 
   @override
   void initState() {
@@ -328,14 +307,6 @@ class _SkillBulletState extends State<_SkillBullet>
       duration: const Duration(milliseconds: 2000),
     );
     _shake = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
-  }
-
-  @override
-  void didUpdateWidget(covariant _SkillBullet oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.isSectionVisible && !widget.isSectionVisible) {
-      _resetToRest();
-    }
   }
 
   @override
@@ -350,17 +321,6 @@ class _SkillBulletState extends State<_SkillBullet>
     _direction = _rng.nextBool() ? 1 : -1;
     _initialAngle = _restingAngle;
     _controller.forward(from: 0);
-  }
-
-  void _resetToRest() {
-    _controller.stop();
-    _controller.reset();
-    setState(() {
-      _restingAngle = 0;
-      _initialAngle = 0;
-      _currentAngle = 0;
-      _direction = 1;
-    });
   }
 
   @override
@@ -381,7 +341,6 @@ class _SkillBulletState extends State<_SkillBullet>
             final double swing =
                 _direction * math.sin(progress * 2.5 * math.pi) * decay;
             final double angle = _initialAngle + swing;
-            _currentAngle = angle;
             if (!_controller.isAnimating) {
               _restingAngle = angle;
             }
@@ -400,7 +359,7 @@ class _SkillBulletState extends State<_SkillBullet>
               color: AppColors.surface,
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: AppColors.primary.withOpacity(0.35),
+                color: AppColors.primary.withValues(alpha: 0.35),
                 width: 1,
               ),
             ),
@@ -455,8 +414,8 @@ class _FlarePainter extends CustomPainter {
       final paint = Paint()
         ..shader = RadialGradient(
           colors: [
-            AppColors.primaryLight.withOpacity(opacity),
-            AppColors.primaryLight.withOpacity(0),
+            AppColors.primaryLight.withValues(alpha: opacity),
+            AppColors.primaryLight.withValues(alpha: 0),
           ],
         ).createShader(Rect.fromCircle(center: pos, radius: baseSize * 1.2))
         ..maskFilter = MaskFilter.blur(BlurStyle.normal, baseSize * 0.5)

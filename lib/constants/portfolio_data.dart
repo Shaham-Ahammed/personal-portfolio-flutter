@@ -45,6 +45,7 @@ I love problem solving and breaking down complex challenges into simple, practic
 
   // Projects
   static const List<Map<String, dynamic>> projects = [
+    // Main Projects
     {
       'title': 'E-Commerce App',
       'description':
@@ -53,6 +54,7 @@ I love problem solving and breaking down complex challenges into simple, practic
       'imageUrl': 'https://via.placeholder.com/400x250',
       'githubUrl': 'https://github.com/yourusername/project1',
       'liveUrl': 'https://project1-demo.com',
+      'type': 'main',
     },
     {
       'title': 'Task Management System',
@@ -62,7 +64,19 @@ I love problem solving and breaking down complex challenges into simple, practic
       'imageUrl': 'https://via.placeholder.com/400x250',
       'githubUrl': 'https://github.com/yourusername/project2',
       'liveUrl': 'https://project2-demo.com',
+      'type': 'main',
     },
+    {
+      'title': 'AI Travel Planner',
+      'description':
+          'An AI-assisted trip planning tool with itinerary drafts, budget tracking, and live recommendations.',
+      'technologies': ['Flutter', 'Firebase', 'OpenAI API'],
+      'imageUrl': 'https://via.placeholder.com/400x250',
+      'githubUrl': 'https://github.com/yourusername/ai-travel-planner',
+      'liveUrl': 'https://ai-travel-planner.com',
+      'type': 'main',
+    },
+    // Mini Projects
     {
       'title': 'Weather App',
       'description':
@@ -71,6 +85,7 @@ I love problem solving and breaking down complex challenges into simple, practic
       'imageUrl': 'https://via.placeholder.com/400x250',
       'githubUrl': 'https://github.com/yourusername/project3',
       'liveUrl': 'https://project3-demo.com',
+      'type': 'mini',
     },
     {
       'title': 'Social Media Dashboard',
@@ -80,6 +95,25 @@ I love problem solving and breaking down complex challenges into simple, practic
       'imageUrl': 'https://via.placeholder.com/400x250',
       'githubUrl': 'https://github.com/yourusername/project4',
       'liveUrl': 'https://project4-demo.com',
+      'type': 'mini',
+    },
+    {
+      'title': 'Calculator App',
+      'description':
+          'A modern calculator app with scientific functions and beautiful UI.',
+      'technologies': ['Flutter', 'Dart'],
+      'imageUrl': 'https://via.placeholder.com/400x250',
+      'githubUrl': 'https://github.com/yourusername/calculator',
+      'type': 'mini',
+    },
+    {
+      'title': 'Todo App',
+      'description':
+          'Simple and elegant todo application with local storage and reminders.',
+      'technologies': ['Flutter', 'Hive'],
+      'imageUrl': 'https://via.placeholder.com/400x250',
+      'githubUrl': 'https://github.com/yourusername/todo',
+      'type': 'mini',
     },
   ];
 
