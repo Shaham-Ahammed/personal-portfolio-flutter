@@ -241,37 +241,28 @@ class _ProjectsSectionState extends State<ProjectsSection> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(
         count,
-        (index) => GestureDetector(
-          onTap: () {
-            _mainProjectsController.animateToPage(
-              index,
-              duration: const Duration(milliseconds: 400),
-              curve: Curves.easeInOut,
-            );
-          },
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            margin: const EdgeInsets.symmetric(horizontal: 6),
-            width: _currentMainProjectIndex == index ? 32 : 10,
-            height: 10,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(5),
-              gradient: _currentMainProjectIndex == index
-                  ? AppColors.primaryGradient
-                  : null,
-              color: _currentMainProjectIndex == index
-                  ? null
-                  : AppColors.primaryLight.withValues(alpha: 0.3),
-              boxShadow: _currentMainProjectIndex == index
-                  ? [
-                      BoxShadow(
-                        color: AppColors.primary.withValues(alpha: 0.5),
-                        blurRadius: 8,
-                        spreadRadius: 1,
-                      ),
-                    ]
-                  : null,
-            ),
+        (index) => AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          margin: const EdgeInsets.symmetric(horizontal: 6),
+          width: _currentMainProjectIndex == index ? 32 : 10,
+          height: 10,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(5),
+            gradient: _currentMainProjectIndex == index
+                ? AppColors.primaryGradient
+                : null,
+            color: _currentMainProjectIndex == index
+                ? null
+                : AppColors.primaryLight.withValues(alpha: 0.3),
+            boxShadow: _currentMainProjectIndex == index
+                ? [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.5),
+                      blurRadius: 8,
+                      spreadRadius: 1,
+                    ),
+                  ]
+                : null,
           ),
         ),
       ),
@@ -469,84 +460,87 @@ class _MainProjectCardState extends State<_MainProjectCard>
           _showGalleryPopup(context);
         }
       },
-      child: ClipRRect(
-        borderRadius: widget.isMobile
-            ? const BorderRadius.vertical(top: Radius.circular(28))
-            : const BorderRadius.horizontal(left: Radius.circular(28)),
-        child: Container(
-          height: widget.isMobile ? 200 : double.infinity,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                AppColors.primary.withValues(alpha: 0.2),
-                AppColors.surfaceLight,
-              ],
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: ClipRRect(
+          borderRadius: widget.isMobile
+              ? const BorderRadius.vertical(top: Radius.circular(28))
+              : const BorderRadius.horizontal(left: Radius.circular(28)),
+          child: Container(
+            height: widget.isMobile ? 200 : double.infinity,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  AppColors.primary.withValues(alpha: 0.2),
+                  AppColors.surfaceLight,
+                ],
+              ),
             ),
-          ),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Image.network(
-                widget.project.imageUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: AppColors.surfaceLight,
-                    child: const Icon(
-                      Icons.image,
-                      size: 60,
-                      color: AppColors.textTertiary,
-                    ),
-                  );
-                },
-              ),
-              Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      AppColors.background.withValues(alpha: 0.6),
-                    ],
-                  ),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.network(
+                  widget.project.imageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: AppColors.surfaceLight,
+                      child: const Icon(
+                        Icons.image,
+                        size: 60,
+                        color: AppColors.textTertiary,
+                      ),
+                    );
+                  },
                 ),
-              ),
-              if (_isHovered && widget.index == widget.currentIndex)
                 Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
                       colors: [
-                        AppColors.primary.withValues(alpha: 0.1),
                         Colors.transparent,
+                        AppColors.background.withValues(alpha: 0.6),
                       ],
                     ),
                   ),
                 ),
-              if (widget.project.galleryImages != null &&
-                  widget.project.galleryImages!.isNotEmpty)
-                Positioned(
-                  top: 12,
-                  right: 12,
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
+                if (_isHovered && widget.index == widget.currentIndex)
+                  Container(
                     decoration: BoxDecoration(
-                      color: AppColors.background.withValues(alpha: 0.8),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(
-                      Icons.collections,
-                      color: AppColors.primaryLight,
-                      size: 20,
+                      gradient: LinearGradient(
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                        colors: [
+                          AppColors.primary.withValues(alpha: 0.1),
+                          Colors.transparent,
+                        ],
+                      ),
                     ),
                   ),
-                ),
-            ],
+                if (widget.project.galleryImages != null &&
+                    widget.project.galleryImages!.isNotEmpty)
+                  Positioned(
+                    top: 12,
+                    right: 12,
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColors.background.withValues(alpha: 0.8),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.collections,
+                        color: AppColors.primaryLight,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
@@ -606,52 +600,55 @@ class _MainProjectCardState extends State<_MainProjectCard>
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
-              height: 40,
-              child: InteractiveViewer(
-                constrained: false,
-                panEnabled: true,
-                scaleEnabled: false,
-                minScale: 1.0,
-                maxScale: 1.0,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: widget.project.technologies.asMap().entries.map((
-                    entry,
-                  ) {
-                    final index = entry.key;
-                    final tech = entry.value;
-                    return Container(
-                      margin: EdgeInsets.only(
-                        right: index < widget.project.technologies.length - 1
-                            ? 8
-                            : 0,
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        gradient: AppColors.primaryGradient,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.primary.withValues(alpha: 0.3),
-                            blurRadius: 8,
-                            spreadRadius: 0,
-                          ),
-                        ],
-                      ),
-                      child: Text(
-                        tech,
-                        style: AppTextStyles.bodySmall(context).copyWith(
-                          fontSize: 12,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
+            MouseRegion(
+              cursor: SystemMouseCursors.grab,
+              child: SizedBox(
+                height: 40,
+                child: InteractiveViewer(
+                  constrained: false,
+                  panEnabled: true,
+                  scaleEnabled: false,
+                  minScale: 1.0,
+                  maxScale: 1.0,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: widget.project.technologies.asMap().entries.map((
+                      entry,
+                    ) {
+                      final index = entry.key;
+                      final tech = entry.value;
+                      return Container(
+                        margin: EdgeInsets.only(
+                          right: index < widget.project.technologies.length - 1
+                              ? 8
+                              : 0,
                         ),
-                      ),
-                    );
-                  }).toList(),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: AppColors.primaryGradient,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primary.withValues(alpha: 0.3),
+                              blurRadius: 8,
+                              spreadRadius: 0,
+                            ),
+                          ],
+                        ),
+                        child: Text(
+                          tech,
+                          style: AppTextStyles.bodySmall(context).copyWith(
+                            fontSize: 12,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
                 ),
               ),
             ),
@@ -688,6 +685,22 @@ class _MainProjectCardState extends State<_MainProjectCard>
                         icon: Icons.android,
                         label: 'Android',
                         onTap: () => _launchUrl(widget.project.androidUrl),
+                      ),
+                      const SizedBox(width: 12),
+                    ],
+                    if (widget.project.userAndroidUrl != null) ...[
+                      _ActionButton(
+                        icon: Icons.android,
+                        label: 'User App',
+                        onTap: () => _launchUrl(widget.project.userAndroidUrl),
+                      ),
+                      const SizedBox(width: 12),
+                    ],
+                    if (widget.project.adminAndroidUrl != null) ...[
+                      _ActionButton(
+                        icon: Icons.android,
+                        label: 'Admin App',
+                        onTap: () => _launchUrl(widget.project.adminAndroidUrl),
                       ),
                       const SizedBox(width: 12),
                     ],
@@ -962,6 +975,26 @@ class _MiniProjectCard extends StatelessWidget {
                             icon: Icons.android,
                             label: 'Android',
                             onTap: () => _launchUrl(project.androidUrl),
+                            isSmall: true,
+                          ),
+                        );
+                      }
+                      if (project.userAndroidUrl != null) {
+                        buttons.add(
+                          _ActionButton(
+                            icon: Icons.android,
+                            label: 'User APK',
+                            onTap: () => _launchUrl(project.userAndroidUrl),
+                            isSmall: true,
+                          ),
+                        );
+                      }
+                      if (project.adminAndroidUrl != null) {
+                        buttons.add(
+                          _ActionButton(
+                            icon: Icons.admin_panel_settings,
+                            label: 'Admin APK',
+                            onTap: () => _launchUrl(project.adminAndroidUrl),
                             isSmall: true,
                           ),
                         );

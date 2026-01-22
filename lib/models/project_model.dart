@@ -9,6 +9,8 @@ class Project {
   final String? githubUrl;
   final String? iosUrl;
   final String? androidUrl;
+  final String? adminAndroidUrl;
+  final String? userAndroidUrl;
   final String? webUrl;
   final ProjectType type;
 
@@ -21,6 +23,8 @@ class Project {
     this.githubUrl,
     this.iosUrl,
     this.androidUrl,
+    this.adminAndroidUrl,
+    this.userAndroidUrl,
     this.webUrl,
     this.type = ProjectType.main,
   });
@@ -37,6 +41,8 @@ class Project {
       githubUrl: map['githubUrl'] as String?,
       iosUrl: map['iosUrl'] as String?,
       androidUrl: map['androidUrl'] as String?,
+      adminAndroidUrl: map['adminAndroidUrl'] as String?,
+      userAndroidUrl: map['userAndroidUrl'] as String?,
       webUrl: map['webUrl'] as String?,
       type: map['type'] == 'mini' ? ProjectType.mini : ProjectType.main,
     );

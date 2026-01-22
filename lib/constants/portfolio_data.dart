@@ -48,7 +48,7 @@ I love problem solving and breaking down complex challenges into simple, practic
     {
       'title': 'Kawader',
       'description':
-          'Government job application platform for Qatar, featuring dedicated jobseeker and employer portals across web and mobile (iOS & Android), enabling job posting, CV creation, interview management and AI-powered assistance.',
+          'Government job application platform for Qatar, featuring dedicated jobseeker and employer portals across web and mobile (iOS & Android)',
       'technologies': [
         'Flutter',
         'REST API',
@@ -79,8 +79,7 @@ I love problem solving and breaking down complex challenges into simple, practic
         'https://res.cloudinary.com/dilbmyvfv/image/upload/v1769072801/Screenshot_2026-01-22_at_11.40.34_AM_srn64n.png',
         'https://res.cloudinary.com/dilbmyvfv/image/upload/v1769072801/Screenshot_2026-01-22_at_11.41.21_AM_mrnnzr.png',
         'https://res.cloudinary.com/dilbmyvfv/image/upload/v1769072800/Screenshot_2026-01-22_at_11.41.47_AM_u4z1aj.png',
-        'https://res.cloudinary.com/dilbmyvfv/image/upload/v1769072799/Screenshot_2026-01-22_at_11.49.28_AM_o11kvt.png'
-
+        'https://res.cloudinary.com/dilbmyvfv/image/upload/v1769072799/Screenshot_2026-01-22_at_11.49.28_AM_o11kvt.png',
       ],
       'webUrl': 'https://www.kawader.gov.qa/',
       'iosUrl': 'https://apps.apple.com/qa/app/kawader-qatar/id6755183682',
@@ -90,19 +89,36 @@ I love problem solving and breaking down complex challenges into simple, practic
       'type': 'main',
     },
     {
-      'title': 'Task Management System',
+      'title': 'Trim Spot',
       'description':
-          'Collaborative task management platform with real-time updates and team collaboration features.',
-      'technologies': ['React', 'Node.js', 'MongoDB'],
-      'imageUrl': 'https://via.placeholder.com/400x250',
-      'galleryImages': [
-        'https://via.placeholder.com/800x600/10B981/FFFFFF?text=Task+Management+1',
-        'https://via.placeholder.com/800x600/F59E0B/FFFFFF?text=Task+Management+2',
-        'https://via.placeholder.com/800x600/EF4444/FFFFFF?text=Task+Management+3',
-        'https://via.placeholder.com/800x600/10B981/FFFFFF?text=Task+Management+4',
+          'TrimSpot is an end-to-end salon booking platform featuring admin, salon and user applications with real-time updates.',
+      'technologies': [
+        'Flutter',
+        'Firebase',
+        'Razorpay',
+        'Bloc',
+        'Google Maps',
+        'Google Authentication',
       ],
-      'githubUrl': 'https://github.com/yourusername/project2',
-
+      'imageUrl': 'https://m.media-amazon.com/images/I/514sByarriL.png',
+      'galleryImages': [
+        'https://res.cloudinary.com/dilbmyvfv/image/upload/v1769086895/WhatsApp_Image_2026-01-22_at_15.54.50_rnrkm3.jpg',
+        'https://res.cloudinary.com/dilbmyvfv/image/upload/v1769086946/WhatsApp_Image_2026-01-22_at_15.54.53_1_nbqk7c.jpg',
+        'https://res.cloudinary.com/dilbmyvfv/image/upload/v1769086895/WhatsApp_Image_2026-01-22_at_15.54.51_qmmroe.jpg',
+        'https://res.cloudinary.com/dilbmyvfv/image/upload/v1769086894/WhatsApp_Image_2026-01-22_at_15.54.51_2_gaynx5.jpg',
+        'https://res.cloudinary.com/dilbmyvfv/image/upload/v1769086894/WhatsApp_Image_2026-01-22_at_15.54.53_zvm5br.jpg',
+        'https://res.cloudinary.com/dilbmyvfv/image/upload/v1769086893/WhatsApp_Image_2026-01-22_at_15.54.52_1_y1k4gg.jpg',
+        'https://res.cloudinary.com/dilbmyvfv/image/upload/v1769086892/WhatsApp_Image_2026-01-22_at_15.54.51_3_ebqket.jpg',
+        'https://res.cloudinary.com/dilbmyvfv/image/upload/v1769086891/WhatsApp_Image_2026-01-22_at_15.54.52_2_gf6n3h.jpg',
+        'https://res.cloudinary.com/dilbmyvfv/image/upload/v1769086890/WhatsApp_Image_2026-01-22_at_15.54.52_3_hgewqj.jpg',
+        'https://res.cloudinary.com/dilbmyvfv/image/upload/v1769086889/WhatsApp_Image_2026-01-22_at_15.54.50_1_g0pyzh.jpg',
+        'https://res.cloudinary.com/dilbmyvfv/image/upload/v1769086889/WhatsApp_Image_2026-01-22_at_15.54.52_4_fmuxo9.jpg',
+        'https://res.cloudinary.com/dilbmyvfv/image/upload/v1769086888/WhatsApp_Image_2026-01-22_at_15.54.52_5_jzewr6.jpg',
+        'https://res.cloudinary.com/dilbmyvfv/image/upload/v1769086888/WhatsApp_Image_2026-01-22_at_15.54.50_2_ktucou.jpg',
+      ],
+      'githubUrl': 'https://github.com/Shaham-Ahammed/trim-spot-user',
+      'userAndroidUrl': 'https://www.amazon.com/dp/B0D571DFTK/ref=apps_sf_sta', 
+      'adminAndroidUrl': 'https://www.amazon.com/dp/B0CY5D6XFL/ref=apps_sf_sta', 
       'type': 'main',
     },
     {
@@ -119,7 +135,7 @@ I love problem solving and breaking down complex challenges into simple, practic
         'https://via.placeholder.com/800x600/6366F1/FFFFFF?text=AI+Travel+Planner+5',
       ],
       'githubUrl': 'https://github.com/yourusername/ai-travel-planner',
-
+      'androidUrl': 'https://www.amazon.com/dp/B0D571DFTK/ref=apps_sf_sta',
       'type': 'main',
     },
     // Mini Projects
