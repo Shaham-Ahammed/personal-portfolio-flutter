@@ -31,7 +31,7 @@ I love problem solving and breaking down complex challenges into simple, practic
     {'name': 'Flutter'},
     {'name': 'Dart'},
     {'name': 'Firebase'},
-     {'name': 'Google Services'},
+    {'name': 'Google Services'},
     {'name': 'Hive'},
     {'name': 'REST API'},
     {'name': 'Figma'},
@@ -40,17 +40,24 @@ I love problem solving and breaking down complex challenges into simple, practic
     {'name': 'GetX'},
     {'name': 'Provider'},
     {'name': 'Clean Architecture'},
-   
   ];
 
   // Projects
   static const List<Map<String, dynamic>> projects = [
     // Main Projects
     {
-      'title': 'E-Commerce App',
+      'title': 'Kawader',
       'description':
-          'A full-featured e-commerce mobile application with payment integration and real-time inventory management.',
-      'technologies': ['Flutter', 'Firebase', 'Stripe'],
+          'Government job application platform for Qatar, featuring dedicated jobseeker and employer portals across web and mobile (iOS & Android), enabling job posting, CV creation, interview management and AI-powered assistance.',
+      'technologies': [
+        'Flutter',
+        'REST API',
+        'GoRouter',
+        'Provider',
+        'Localization',
+        'Clean Architecture',
+        'Theme Management',
+      ],
       'imageUrl': 'https://via.placeholder.com/400x250',
       'githubUrl': 'https://github.com/yourusername/project1',
       'liveUrl': 'https://project1-demo.com',

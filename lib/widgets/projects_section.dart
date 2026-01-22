@@ -43,8 +43,12 @@ class _ProjectsSectionState extends State<ProjectsSection> {
         .map((project) => Project.fromMap(project))
         .toList();
 
-    final mainProjects = allProjects.where((p) => p.type == ProjectType.main).toList();
-    final miniProjects = allProjects.where((p) => p.type == ProjectType.mini).toList();
+    final mainProjects = allProjects
+        .where((p) => p.type == ProjectType.main)
+        .toList();
+    final miniProjects = allProjects
+        .where((p) => p.type == ProjectType.mini)
+        .toList();
 
     return Container(
       width: double.infinity,
@@ -65,7 +69,7 @@ class _ProjectsSectionState extends State<ProjectsSection> {
               style: AppTextStyles.heading4(context),
             ),
             const SizedBox(height: 50),
-            
+
             // Main Projects Section
             if (mainProjects.isNotEmpty) ...[
               _buildMainProjectsCarousel(context, mainProjects, isMobile),
@@ -74,10 +78,7 @@ class _ProjectsSectionState extends State<ProjectsSection> {
 
             // Mini Projects Section
             if (miniProjects.isNotEmpty) ...[
-              Text(
-                'Mini Projects',
-                style: AppTextStyles.heading3(context),
-              ),
+              Text('Mini Projects', style: AppTextStyles.heading3(context)),
               const SizedBox(height: 24),
               _buildMiniProjectsList(context, miniProjects, isMobile),
             ],
@@ -125,9 +126,9 @@ class _ProjectsSectionState extends State<ProjectsSection> {
                       // Roller-like curved stack: neighbors curve away, center pops
                       final rotationY = clamped * 0.9; // stronger curve
                       // Scale animates with page drag; side cards drop to 0.6, center to 1
-                      final scale =
-                          (1 - (clamped.abs() * 0.4)).clamp(0.6, 1.0);
-                      final translateZ = -80 * clamped.abs(); // curve back slightly
+                      final scale = (1 - (clamped.abs() * 0.4)).clamp(0.6, 1.0);
+                      final translateZ =
+                          -80 * clamped.abs(); // curve back slightly
                       // push side cards outward to avoid overlap
                       final translateX = clamped * (isMobile ? 30 : 70);
                       final opacity = 1 - (clamped.abs() * 0.35);
@@ -145,9 +146,7 @@ class _ProjectsSectionState extends State<ProjectsSection> {
                             Vector3(translateX, 0.0, translateZ),
                           )
                           ..rotateY(rotationY)
-                          ..scaleByVector3(
-                            Vector3(scale, scale, scale),
-                          ),
+                          ..scaleByVector3(Vector3(scale, scale, scale)),
                         child: Opacity(
                           opacity: opacity,
                           child: Padding(
@@ -247,7 +246,7 @@ class _ProjectsSectionState extends State<ProjectsSection> {
               boxShadow: _currentMainProjectIndex == index
                   ? [
                       BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.5),
+                        color: AppColors.primary.withValues(alpha: 0.5),
                         blurRadius: 8,
                         spreadRadius: 1,
                       ),
@@ -310,6 +309,7 @@ class _MainProjectCardState extends State<_MainProjectCard>
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
   late Animation<double> _glowAnimation;
+  late ScrollController _techScrollController;
 
   @override
   void initState() {
@@ -324,11 +324,13 @@ class _MainProjectCardState extends State<_MainProjectCard>
     _glowAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
+    _techScrollController = ScrollController();
   }
 
   @override
   void dispose() {
     _animationController.dispose();
+    _techScrollController.dispose();
     super.dispose();
   }
 
@@ -355,7 +357,7 @@ class _MainProjectCardState extends State<_MainProjectCard>
   @override
   Widget build(BuildContext context) {
     final isActive = widget.index == widget.currentIndex;
-    
+
     return MouseRegion(
       onEnter: (_) => _onHover(true),
       onExit: (_) => _onHover(false),
@@ -379,8 +381,8 @@ class _MainProjectCardState extends State<_MainProjectCard>
                     : null,
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primary.withValues(alpha:
-                      0.3 * _glowAnimation.value * (isActive ? 1 : 0.5),
+                    color: AppColors.primary.withValues(
+                      alpha: 0.3 * _glowAnimation.value * (isActive ? 1 : 0.5),
                     ),
                     blurRadius: 30 * _glowAnimation.value,
                     spreadRadius: 5 * _glowAnimation.value,
@@ -428,10 +430,7 @@ class _MainProjectCardState extends State<_MainProjectCard>
     return Row(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Expanded(
-          flex: 5,
-          child: _buildImageSection(),
-        ),
+        Expanded(flex: 5, child: _buildImageSection()),
         Expanded(
           flex: 4,
           child: Padding(
@@ -485,7 +484,7 @@ class _MainProjectCardState extends State<_MainProjectCard>
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-              AppColors.background.withValues(alpha: 0.6),
+                    AppColors.background.withValues(alpha: 0.6),
                   ],
                 ),
               ),
@@ -548,38 +547,56 @@ class _MainProjectCardState extends State<_MainProjectCard>
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: widget.project.technologies
-                  .map(
-                    (tech) => Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        gradient: AppColors.primaryGradient,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.primary.withValues(alpha: 0.3),
-                            blurRadius: 8,
-                            spreadRadius: 0,
-                          ),
-                        ],
-                      ),
-                      child: Text(
-                        tech,
-                        style: AppTextStyles.bodySmall(context).copyWith(
-                          fontSize: 12,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  )
-                  .toList(),
+            SizedBox(
+              height: 40,
+              child: InteractiveViewer(
+                constrained: false,
+                panEnabled: true,
+                scaleEnabled: false,
+                minScale: 1.0,
+                maxScale: 1.0,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: widget.project.technologies
+                      .asMap()
+                      .entries
+                      .map(
+                        (entry) {
+                          final index = entry.key;
+                          final tech = entry.value;
+                          return Container(
+                            margin: EdgeInsets.only(
+                              right: index < widget.project.technologies.length - 1 ? 8 : 0,
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              gradient: AppColors.primaryGradient,
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.primary.withValues(alpha: 0.3),
+                                  blurRadius: 8,
+                                  spreadRadius: 0,
+                                ),
+                              ],
+                            ),
+                            child: Text(
+                              tech,
+                              style: AppTextStyles.bodySmall(context).copyWith(
+                                fontSize: 12,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          );
+                        },
+                      )
+                      .toList(),
+                ),
+              ),
             ),
             const SizedBox(height: 24),
             Row(
@@ -590,7 +607,6 @@ class _MainProjectCardState extends State<_MainProjectCard>
                       icon: Icons.code,
                       label: 'Code',
                       onTap: () => _launchUrl(widget.project.githubUrl),
-                      isPrimary: true,
                     ),
                   ),
                 if (widget.project.githubUrl != null &&
@@ -602,7 +618,6 @@ class _MainProjectCardState extends State<_MainProjectCard>
                       icon: Icons.open_in_new,
                       label: 'Live',
                       onTap: () => _launchUrl(widget.project.liveUrl),
-                      isPrimary: false,
                     ),
                   ),
               ],
@@ -678,8 +693,8 @@ class _NavigationButtonState extends State<_NavigationButton>
                       ? AppColors.primaryGradient
                       : null,
                   color: widget.isEnabled
-                  ? AppColors.surface.withValues(alpha: 0.8)
-                  : AppColors.surface.withValues(alpha: 0.3),
+                      ? AppColors.surface.withValues(alpha: 0.8)
+                      : AppColors.surface.withValues(alpha: 0.3),
                   border: Border.all(
                     color: widget.isEnabled
                         ? AppColors.primary.withValues(alpha: 0.5)
@@ -716,10 +731,7 @@ class _MiniProjectCard extends StatelessWidget {
   final Project project;
   final bool isMobile;
 
-  const _MiniProjectCard({
-    required this.project,
-    required this.isMobile,
-  });
+  const _MiniProjectCard({required this.project, required this.isMobile});
 
   Future<void> _launchUrl(String? url) async {
     if (url != null && url.isNotEmpty) {
@@ -849,17 +861,16 @@ class _MiniProjectCard extends StatelessWidget {
                             icon: Icons.code,
                             label: 'Code',
                             onTap: () => _launchUrl(project.githubUrl),
-                            isPrimary: false,
                             isSmall: true,
                           ),
-                        if (project.githubUrl != null && project.liveUrl != null)
+                        if (project.githubUrl != null &&
+                            project.liveUrl != null)
                           const SizedBox(width: 8),
                         if (project.liveUrl != null)
                           _ActionButton(
                             icon: Icons.open_in_new,
                             label: 'Live',
                             onTap: () => _launchUrl(project.liveUrl),
-                            isPrimary: false,
                             isSmall: true,
                           ),
                       ],
@@ -874,7 +885,7 @@ class _MiniProjectCard extends StatelessWidget {
   }
 }
 
-class _ActionButton extends StatelessWidget {
+class _ActionButton extends StatefulWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
@@ -890,43 +901,117 @@ class _ActionButton extends StatelessWidget {
   });
 
   @override
+  State<_ActionButton> createState() => _ActionButtonState();
+}
+
+class _ActionButtonState extends State<_ActionButton>
+    with SingleTickerProviderStateMixin {
+  bool _isHovered = false;
+  late AnimationController _colorAnimationController;
+  late Animation<Color?> _iconColorAnimation;
+  late Animation<Color?> _textColorAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _colorAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+    _iconColorAnimation = ColorTween(
+      begin: AppColors.primaryLight,
+      end: Colors.white,
+    ).animate(CurvedAnimation(
+      parent: _colorAnimationController,
+      curve: Curves.easeInOut,
+    ));
+    _textColorAnimation = ColorTween(
+      begin: AppColors.primaryLight,
+      end: Colors.white,
+    ).animate(CurvedAnimation(
+      parent: _colorAnimationController,
+      curve: Curves.easeInOut,
+    ));
+  }
+
+  @override
+  void dispose() {
+    _colorAnimationController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: isSmall ? 12 : 16,
-          vertical: isSmall ? 6 : 10,
-        ),
-        decoration: BoxDecoration(
-          gradient: isPrimary ? AppColors.primaryGradient : null,
-          color: isPrimary ? null : AppColors.primary.withValues(alpha: 0.2),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: AppColors.primary.withValues(alpha: isPrimary ? 0.5 : 0.3),
-            width: 1,
+    if (_isHovered) {
+      _colorAnimationController.forward();
+    } else {
+      _colorAnimationController.reverse();
+    }
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: InkWell(
+        onTap: widget.onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: EdgeInsets.symmetric(
+            horizontal: widget.isSmall ? 12 : 16,
+            vertical: widget.isSmall ? 6 : 10,
           ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: isSmall ? 16 : 18,
-              color: isPrimary ? Colors.white : AppColors.primaryLight,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: _isHovered
+                  ? [
+                      AppColors.primaryLight,
+                      AppColors.primary,
+                      const Color(0xFF8B5CF6),
+                    ]
+                  : [
+                      AppColors.primary.withValues(alpha: 0.2),
+                      AppColors.primary.withValues(alpha: 0.2),
+                    ],
             ),
-            SizedBox(width: isSmall ? 4 : 6),
-            Text(
-              label,
-              style: AppTextStyles.bodySmall(context).copyWith(
-                color: isPrimary ? Colors.white : AppColors.primaryLight,
-                fontWeight: FontWeight.w600,
-                fontSize: isSmall ? 12 : 14,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: _isHovered
+                  ? AppColors.primaryLight
+                  : AppColors.primary.withValues(alpha: 0.3),
+              width: _isHovered ? 1.5 : 1,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              AnimatedBuilder(
+                animation: _iconColorAnimation,
+                builder: (context, child) {
+                  return Icon(
+                    widget.icon,
+                    size: widget.isSmall ? 16 : 18,
+                    color: _iconColorAnimation.value,
+                  );
+                },
               ),
-            ),
-          ],
+              SizedBox(width: widget.isSmall ? 4 : 6),
+              AnimatedBuilder(
+                animation: _textColorAnimation,
+                builder: (context, child) {
+                  return Text(
+                    widget.label,
+                    style: AppTextStyles.bodySmall(context).copyWith(
+                      color: _textColorAnimation.value,
+                      fontWeight: FontWeight.w600,
+                      fontSize: widget.isSmall ? 12 : 14,
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
