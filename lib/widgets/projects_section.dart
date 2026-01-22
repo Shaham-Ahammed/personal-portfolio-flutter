@@ -21,11 +21,30 @@ class _ProjectsSectionState extends State<ProjectsSection> {
   @override
   void initState() {
     super.initState();
-    // Large initial page to simulate infinite loop feel
+    // Calculate initial page to show first item (index 0)
+    final allProjects = PortfolioData.projects
+        .map((project) => Project.fromMap(project))
+        .toList();
+    final mainProjects = allProjects
+        .where((p) => p.type == ProjectType.main)
+        .toList();
+    final projectsCount = mainProjects.length;
+    // Set initial page to a multiple of projectsCount to ensure it shows index 0
+    final initialPage = projectsCount > 0 ? (1000 ~/ projectsCount) * projectsCount : 1000;
+    
     _mainProjectsController = PageController(
       viewportFraction: 0.62,
-      initialPage: 1000,
+      initialPage: initialPage,
     );
+    
+    // Ensure indicator shows first item on initial load
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && projectsCount > 0) {
+        setState(() {
+          _currentMainProjectIndex = initialPage % projectsCount;
+        });
+      }
+    });
   }
 
   @override
@@ -177,14 +196,12 @@ class _ProjectsSectionState extends State<ProjectsSection> {
                     child: _NavigationButton(
                       icon: Icons.arrow_back_ios,
                       onTap: () {
-                        if (_currentMainProjectIndex > 0) {
-                          _mainProjectsController.previousPage(
-                            duration: const Duration(milliseconds: 400),
-                            curve: Curves.easeInOut,
-                          );
-                        }
+                        _mainProjectsController.previousPage(
+                          duration: const Duration(milliseconds: 400),
+                          curve: Curves.easeInOut,
+                        );
                       },
-                      isEnabled: _currentMainProjectIndex > 0,
+                      isEnabled: true,
                     ),
                   ),
                 ),
@@ -197,14 +214,12 @@ class _ProjectsSectionState extends State<ProjectsSection> {
                     child: _NavigationButton(
                       icon: Icons.arrow_forward_ios,
                       onTap: () {
-                        if (_currentMainProjectIndex < projects.length - 1) {
-                          _mainProjectsController.nextPage(
-                            duration: const Duration(milliseconds: 400),
-                            curve: Curves.easeInOut,
-                          );
-                        }
+                        _mainProjectsController.nextPage(
+                          duration: const Duration(milliseconds: 400),
+                          curve: Curves.easeInOut,
+                        );
                       },
-                      isEnabled: _currentMainProjectIndex < projects.length - 1,
+                      isEnabled: true,
                     ),
                   ),
                 ),
