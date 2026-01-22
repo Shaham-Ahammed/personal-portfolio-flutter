@@ -599,28 +599,50 @@ class _MainProjectCardState extends State<_MainProjectCard>
               ),
             ),
             const SizedBox(height: 24),
-            Row(
-              children: [
-                if (widget.project.githubUrl != null)
-                  Expanded(
-                    child: _ActionButton(
-                      icon: Icons.code,
-                      label: 'Code',
-                      onTap: () => _launchUrl(widget.project.githubUrl),
-                    ),
-                  ),
-                if (widget.project.githubUrl != null &&
-                    widget.project.liveUrl != null)
-                  const SizedBox(width: 12),
-                if (widget.project.liveUrl != null)
-                  Expanded(
-                    child: _ActionButton(
-                      icon: Icons.open_in_new,
-                      label: 'Live',
-                      onTap: () => _launchUrl(widget.project.liveUrl),
-                    ),
-                  ),
-              ],
+            SizedBox(
+              height: 48,
+              child: InteractiveViewer(
+                constrained: false,
+                panEnabled: true,
+                scaleEnabled: false,
+                minScale: 1.0,
+                maxScale: 1.0,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (widget.project.githubUrl != null) ...[
+                      _ActionButton(
+                        icon: Icons.code,
+                        label: 'Code',
+                        onTap: () => _launchUrl(widget.project.githubUrl),
+                      ),
+                      const SizedBox(width: 12),
+                    ],
+                    if (widget.project.iosUrl != null) ...[
+                      _ActionButton(
+                        icon: Icons.phone_iphone,
+                        label: 'iOS',
+                        onTap: () => _launchUrl(widget.project.iosUrl),
+                      ),
+                      const SizedBox(width: 12),
+                    ],
+                    if (widget.project.androidUrl != null) ...[
+                      _ActionButton(
+                        icon: Icons.android,
+                        label: 'Android',
+                        onTap: () => _launchUrl(widget.project.androidUrl),
+                      ),
+                      const SizedBox(width: 12),
+                    ],
+                    if (widget.project.webUrl != null)
+                      _ActionButton(
+                        icon: Icons.language,
+                        label: 'Web',
+                        onTap: () => _launchUrl(widget.project.webUrl),
+                      ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
@@ -853,28 +875,77 @@ class _MiniProjectCard extends StatelessWidget {
                         .toList(),
                   ),
                   const SizedBox(height: 12),
-                  if (project.githubUrl != null || project.liveUrl != null)
-                    Row(
-                      children: [
-                        if (project.githubUrl != null)
+                  Builder(
+                    builder: (context) {
+                      final buttons = <Widget>[];
+                      
+                      if (project.githubUrl != null) {
+                        buttons.add(
                           _ActionButton(
                             icon: Icons.code,
                             label: 'Code',
                             onTap: () => _launchUrl(project.githubUrl),
                             isSmall: true,
                           ),
-                        if (project.githubUrl != null &&
-                            project.liveUrl != null)
-                          const SizedBox(width: 8),
-                        if (project.liveUrl != null)
+                        );
+                      }
+                      if (project.iosUrl != null) {
+                        buttons.add(
                           _ActionButton(
-                            icon: Icons.open_in_new,
-                            label: 'Live',
-                            onTap: () => _launchUrl(project.liveUrl),
+                            icon: Icons.phone_iphone,
+                            label: 'iOS',
+                            onTap: () => _launchUrl(project.iosUrl),
                             isSmall: true,
                           ),
-                      ],
-                    ),
+                        );
+                      }
+                      if (project.androidUrl != null) {
+                        buttons.add(
+                          _ActionButton(
+                            icon: Icons.android,
+                            label: 'Android',
+                            onTap: () => _launchUrl(project.androidUrl),
+                            isSmall: true,
+                          ),
+                        );
+                      }
+                      if (project.webUrl != null) {
+                        buttons.add(
+                          _ActionButton(
+                            icon: Icons.language,
+                            label: 'Web',
+                            onTap: () => _launchUrl(project.webUrl),
+                            isSmall: true,
+                          ),
+                        );
+                      }
+                      
+                      if (buttons.isEmpty) return const SizedBox.shrink();
+                      
+                      final rowChildren = <Widget>[];
+                      for (int i = 0; i < buttons.length; i++) {
+                        rowChildren.add(buttons[i]);
+                        if (i < buttons.length - 1) {
+                          rowChildren.add(const SizedBox(width: 8));
+                        }
+                      }
+                      
+                      return SizedBox(
+                        height: 40,
+                        child: InteractiveViewer(
+                          constrained: false,
+                          panEnabled: true,
+                          scaleEnabled: false,
+                          minScale: 1.0,
+                          maxScale: 1.0,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: rowChildren,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ],
               ),
             ),

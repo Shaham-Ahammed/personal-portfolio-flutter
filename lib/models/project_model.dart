@@ -6,7 +6,9 @@ class Project {
   final List<String> technologies;
   final String imageUrl;
   final String? githubUrl;
-  final String? liveUrl;
+  final String? iosUrl;
+  final String? androidUrl;
+  final String? webUrl;
   final ProjectType type;
 
   const Project({
@@ -15,7 +17,9 @@ class Project {
     required this.technologies,
     required this.imageUrl,
     this.githubUrl,
-    this.liveUrl,
+    this.iosUrl,
+    this.androidUrl,
+    this.webUrl,
     this.type = ProjectType.main,
   });
 
@@ -26,7 +30,9 @@ class Project {
       technologies: List<String>.from(map['technologies'] as List),
       imageUrl: map['imageUrl'] as String,
       githubUrl: map['githubUrl'] as String?,
-      liveUrl: map['liveUrl'] as String?,
+      iosUrl: map['iosUrl'] as String?,
+      androidUrl: map['androidUrl'] as String?,
+      webUrl: map['webUrl'] as String?,
       type: map['type'] == 'mini' ? ProjectType.mini : ProjectType.main,
     );
   }

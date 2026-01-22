@@ -60,7 +60,10 @@ I love problem solving and breaking down complex challenges into simple, practic
       ],
       'imageUrl': 'https://via.placeholder.com/400x250',
       'githubUrl': 'https://github.com/yourusername/project1',
-      'liveUrl': 'https://project1-demo.com',
+      
+      'iosUrl': 'https://apps.apple.com/us/app/kawader/id6756756756756756',
+      'androidUrl': 'https://play.google.com/store/apps/details?id=com.kawader.app',
+      'webUrl': 'https://kawader.com',
       'type': 'main',
     },
     {
@@ -70,7 +73,7 @@ I love problem solving and breaking down complex challenges into simple, practic
       'technologies': ['React', 'Node.js', 'MongoDB'],
       'imageUrl': 'https://via.placeholder.com/400x250',
       'githubUrl': 'https://github.com/yourusername/project2',
-      'liveUrl': 'https://project2-demo.com',
+    
       'type': 'main',
     },
     {
@@ -80,7 +83,7 @@ I love problem solving and breaking down complex challenges into simple, practic
       'technologies': ['Flutter', 'Firebase', 'OpenAI API'],
       'imageUrl': 'https://via.placeholder.com/400x250',
       'githubUrl': 'https://github.com/yourusername/ai-travel-planner',
-      'liveUrl': 'https://ai-travel-planner.com',
+    
       'type': 'main',
     },
     // Mini Projects
@@ -91,7 +94,6 @@ I love problem solving and breaking down complex challenges into simple, practic
       'technologies': ['Flutter', 'REST API', 'Location Services'],
       'imageUrl': 'https://via.placeholder.com/400x250',
       'githubUrl': 'https://github.com/yourusername/project3',
-      'liveUrl': 'https://project3-demo.com',
       'type': 'mini',
     },
     {
@@ -101,7 +103,6 @@ I love problem solving and breaking down complex challenges into simple, practic
       'technologies': ['React', 'Express', 'PostgreSQL'],
       'imageUrl': 'https://via.placeholder.com/400x250',
       'githubUrl': 'https://github.com/yourusername/project4',
-      'liveUrl': 'https://project4-demo.com',
       'type': 'mini',
     },
     {
