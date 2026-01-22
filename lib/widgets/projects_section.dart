@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
@@ -31,13 +32,15 @@ class _ProjectsSectionState extends State<ProjectsSection> {
         .toList();
     final projectsCount = mainProjects.length;
     // Set initial page to a multiple of projectsCount to ensure it shows index 0
-    final initialPage = projectsCount > 0 ? (1000 ~/ projectsCount) * projectsCount : 1000;
-    
+    final initialPage = projectsCount > 0
+        ? (1000 ~/ projectsCount) * projectsCount
+        : 1000;
+
     _mainProjectsController = PageController(
       viewportFraction: 0.62,
       initialPage: initialPage,
     );
-    
+
     // Ensure indicator shows first item on initial load
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && projectsCount > 0) {
@@ -553,7 +556,7 @@ class _MainProjectCardState extends State<_MainProjectCard>
   void _showGalleryPopup(BuildContext context) {
     final random = DateTime.now().millisecondsSinceEpoch % 2;
     final isFromTopLeft = random == 0;
-    
+
     showDialog(
       context: context,
       barrierColor: Colors.black.withValues(alpha: 0.8),
@@ -613,44 +616,42 @@ class _MainProjectCardState extends State<_MainProjectCard>
                 maxScale: 1.0,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: widget.project.technologies
-                      .asMap()
-                      .entries
-                      .map(
-                        (entry) {
-                          final index = entry.key;
-                          final tech = entry.value;
-                          return Container(
-                            margin: EdgeInsets.only(
-                              right: index < widget.project.technologies.length - 1 ? 8 : 0,
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              gradient: AppColors.primaryGradient,
-                              borderRadius: BorderRadius.circular(20),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.primary.withValues(alpha: 0.3),
-                                  blurRadius: 8,
-                                  spreadRadius: 0,
-                                ),
-                              ],
-                            ),
-                            child: Text(
-                              tech,
-                              style: AppTextStyles.bodySmall(context).copyWith(
-                                fontSize: 12,
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          );
-                        },
-                      )
-                      .toList(),
+                  children: widget.project.technologies.asMap().entries.map((
+                    entry,
+                  ) {
+                    final index = entry.key;
+                    final tech = entry.value;
+                    return Container(
+                      margin: EdgeInsets.only(
+                        right: index < widget.project.technologies.length - 1
+                            ? 8
+                            : 0,
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        gradient: AppColors.primaryGradient,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.3),
+                            blurRadius: 8,
+                            spreadRadius: 0,
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        tech,
+                        style: AppTextStyles.bodySmall(context).copyWith(
+                          fontSize: 12,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    );
+                  }).toList(),
                 ),
               ),
             ),
@@ -934,7 +935,7 @@ class _MiniProjectCard extends StatelessWidget {
                   Builder(
                     builder: (context) {
                       final buttons = <Widget>[];
-                      
+
                       if (project.githubUrl != null) {
                         buttons.add(
                           _ActionButton(
@@ -975,9 +976,9 @@ class _MiniProjectCard extends StatelessWidget {
                           ),
                         );
                       }
-                      
+
                       if (buttons.isEmpty) return const SizedBox.shrink();
-                      
+
                       final rowChildren = <Widget>[];
                       for (int i = 0; i < buttons.length; i++) {
                         rowChildren.add(buttons[i]);
@@ -985,7 +986,7 @@ class _MiniProjectCard extends StatelessWidget {
                           rowChildren.add(const SizedBox(width: 8));
                         }
                       }
-                      
+
                       return SizedBox(
                         height: 40,
                         child: InteractiveViewer(
@@ -1045,20 +1046,20 @@ class _ActionButtonState extends State<_ActionButton>
       vsync: this,
       duration: const Duration(milliseconds: 200),
     );
-    _iconColorAnimation = ColorTween(
-      begin: AppColors.primaryLight,
-      end: Colors.white,
-    ).animate(CurvedAnimation(
-      parent: _colorAnimationController,
-      curve: Curves.easeInOut,
-    ));
-    _textColorAnimation = ColorTween(
-      begin: AppColors.primaryLight,
-      end: Colors.white,
-    ).animate(CurvedAnimation(
-      parent: _colorAnimationController,
-      curve: Curves.easeInOut,
-    ));
+    _iconColorAnimation =
+        ColorTween(begin: AppColors.primaryLight, end: Colors.white).animate(
+          CurvedAnimation(
+            parent: _colorAnimationController,
+            curve: Curves.easeInOut,
+          ),
+        );
+    _textColorAnimation =
+        ColorTween(begin: AppColors.primaryLight, end: Colors.white).animate(
+          CurvedAnimation(
+            parent: _colorAnimationController,
+            curve: Curves.easeInOut,
+          ),
+        );
   }
 
   @override
@@ -1166,6 +1167,9 @@ class _ProjectGalleryPopupState extends State<_ProjectGalleryPopup>
   late Animation<double> _opacityAnimation;
   late int _crossAxisCount;
   late double _spacing;
+  late List<double>
+  _aspectRatios; // Pre-calculated aspect ratios to prevent layout shifts
+  late Offset _endOffset; // Store the end offset for closing animation
 
   @override
   void initState() {
@@ -1180,34 +1184,56 @@ class _ProjectGalleryPopupState extends State<_ProjectGalleryPopup>
     _crossAxisCount = [3, 4][random % 2]; // 3 or 4 columns for smaller images
     _spacing = 10.0;
 
+    // Pre-calculate aspect ratios once to prevent layout shifts during scrolling
+    final images = widget.project.galleryImages ?? [];
+    final aspectRatioOptions = [
+      0.7,
+      0.8,
+      0.9,
+      1.0,
+      1.1,
+      1.2,
+      1.3,
+      1.4,
+      1.5,
+      1.6,
+    ];
+    _aspectRatios = List.generate(
+      images.length,
+      (index) =>
+          aspectRatioOptions[(random + index) % aspectRatioOptions.length],
+    );
+
     // Slide animation from top-left or top-right
     final startOffset = widget.isFromTopLeft
         ? const Offset(-1.0, -1.0)
         : const Offset(1.0, -1.0);
+    
+    // End offset is opposite direction for closing
+    _endOffset = widget.isFromTopLeft
+        ? const Offset(1.0, -1.0)
+        : const Offset(-1.0, -1.0);
 
-    _slideAnimation = Tween<Offset>(
-      begin: startOffset,
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutCubic,
-    ));
+    // Create animation that goes to opposite direction when closing
+    _slideAnimation = TweenSequence<Offset>([
+      TweenSequenceItem(
+        tween: Tween<Offset>(
+          begin: startOffset,
+          end: Offset.zero,
+        ).chain(CurveTween(curve: Curves.easeOutCubic)),
+        weight: 1.0,
+      ),
+    ]).animate(_controller);
 
     _scaleAnimation = Tween<double>(
       begin: 0.3,
       end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutCubic,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
 
     _opacityAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOut,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     _controller.forward();
   }
@@ -1219,7 +1245,43 @@ class _ProjectGalleryPopupState extends State<_ProjectGalleryPopup>
   }
 
   void _closePopup() {
-    _controller.reverse().then((_) {
+    // Reset controller and create new animations for closing
+    _controller.reset();
+    
+    // Create new animations from center to opposite direction
+    final closeSlideAnimation = Tween<Offset>(
+      begin: Offset.zero,
+      end: _endOffset,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInCubic,
+    ));
+    
+    final closeScaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.3,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInCubic,
+    ));
+    
+    final closeOpacityAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.0,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeIn,
+    ));
+    
+    // Replace animations for closing
+    setState(() {
+      _slideAnimation = closeSlideAnimation;
+      _scaleAnimation = closeScaleAnimation;
+      _opacityAnimation = closeOpacityAnimation;
+    });
+    
+    // Animate to opposite direction
+    _controller.forward().then((_) {
       if (mounted) {
         Navigator.of(context).pop();
       }
@@ -1242,59 +1304,114 @@ class _ProjectGalleryPopupState extends State<_ProjectGalleryPopup>
             insetPadding: const EdgeInsets.all(20),
             child: Container(
               constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.64,
-                maxHeight: MediaQuery.of(context).size.height * 0.64,
+                maxWidth: MediaQuery.of(context).size.width * 0.69,
+                maxHeight: MediaQuery.of(context).size.height * 0.69,
               ),
-              width: MediaQuery.of(context).size.width * 0.64,
-              height: MediaQuery.of(context).size.height * 0.64,
+              width: MediaQuery.of(context).size.width * 0.69,
+              height: MediaQuery.of(context).size.height * 0.69,
               decoration: BoxDecoration(
                 color: AppColors.surface,
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(
-                  color: AppColors.primary.withValues(alpha: 0.3),
-                  width: 1,
+                  color: AppColors.primary.withValues(alpha: 0.5),
+                  width: 1.5,
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.2),
+                    blurRadius: 12,
+                    spreadRadius: 1,
+                  ),
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.1),
+                    blurRadius: 24,
+                    spreadRadius: 2,
+                  ),
+                ],
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Header
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: AppColors.primary.withValues(alpha: 0.2),
-                          width: 1,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: Stack(
+                  children: [
+                    // Scrollable Gallery Grid
+                    Positioned.fill(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(12, 70, 12, 12),
+                        child: ClipRRect(
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(20),
+                            bottom: Radius.circular(20),
+                          ),
+                          child: _buildGrid(images),
                         ),
                       ),
                     ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            widget.project.title,
-                            style: AppTextStyles.heading3(context),
+                    // Glassy Header Overlay
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      child: ClipRRect(
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(24),
+                        ),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: AppColors.surface.withValues(alpha: 0.1),
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  AppColors.surface.withValues(alpha: 0.4),
+                                  AppColors.surface.withValues(alpha: 0.3),
+                                  AppColors.surface.withValues(alpha: 0.3),
+                                  AppColors.surface.withValues(alpha: 0.2),
+                                ],
+                                stops: const [0.0, 0.3, 0.7, 1.0],
+                              ).withOpacity(0.1),
+                              // border: Border(
+                              //   bottom: BorderSide(
+                              //     color: AppColors.primary.withValues(alpha: 0.2),
+                              //     width: 1,
+                              //   ),
+                              // ),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 14,
+                                  height: 14,
+
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: AppColors.primaryGradient,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    widget.project.title,
+                                    style: AppTextStyles.heading3(context),
+                                  ),
+                                ),
+                                IconButton(
+                                  onPressed: _closePopup,
+                                  icon: const Icon(
+                                    Icons.close,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                        IconButton(
-                          onPressed: _closePopup,
-                          icon: const Icon(
-                            Icons.close,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                  // Gallery Grid
-                  Flexible(
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: _buildGrid(images),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -1311,27 +1428,50 @@ class _ProjectGalleryPopupState extends State<_ProjectGalleryPopup>
       crossAxisSpacing: _spacing,
       itemCount: images.length,
       itemBuilder: (context, index) {
-        // Random aspect ratios for Pinterest-style layout
-        final random = DateTime.now().millisecondsSinceEpoch + index;
-        final aspectRatios = [0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6];
-        final aspectRatio = aspectRatios[random % aspectRatios.length];
-        
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: AspectRatio(
-            aspectRatio: aspectRatio,
-            child: Image.network(
-              images[index],
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  color: AppColors.surfaceLight,
-                  child: const Icon(
-                    Icons.broken_image,
-                    color: AppColors.textTertiary,
-                  ),
-                );
-              },
+        // Use pre-calculated aspect ratio to prevent layout shifts during scrolling
+        final aspectRatio = _aspectRatios[index];
+
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: .3),
+              width: 1.5,
+            ),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: AspectRatio(
+              aspectRatio: aspectRatio,
+              child: Image.network(
+                images[index],
+                fit: BoxFit.cover,
+                // Add loadingBuilder to prevent layout shifts while images load
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Container(
+                    color: AppColors.surfaceLight,
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded /
+                                  loadingProgress.expectedTotalBytes!
+                            : null,
+                        color: AppColors.primaryLight,
+                      ),
+                    ),
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    color: AppColors.surfaceLight,
+                    child: const Icon(
+                      Icons.broken_image,
+                      color: AppColors.textTertiary,
+                    ),
+                  );
+                },
+              ),
             ),
           ),
         );
