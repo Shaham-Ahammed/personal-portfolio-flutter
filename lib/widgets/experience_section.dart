@@ -101,8 +101,10 @@ class _ExperienceCardState extends State<_ExperienceCard>
     with TickerProviderStateMixin, WidgetsBindingObserver {
   late AnimationController _animationController;
   late AnimationController _stackingController;
+  late AnimationController _typewriterController;
   late Animation<double> _rotationAnimation;
   late Animation<double> _stackingAnimation;
+  late Animation<int> _typewriterAnimation;
   final GlobalKey _cardKey = GlobalKey();
   bool _cardAnimated = false;
 
@@ -120,6 +122,23 @@ class _ExperienceCardState extends State<_ExperienceCard>
       vsync: this,
       duration: const Duration(milliseconds: 600), // Stacking animation duration
     );
+
+    // Typewriter animation controller - starts after initial animation completes
+    final companyName = widget.experience.company;
+    final typewriterDuration = Duration(milliseconds: companyName.length * 50); // 50ms per character
+    _typewriterController = AnimationController(
+      vsync: this,
+      duration: typewriterDuration,
+    );
+
+    // Typewriter animation: reveals characters one by one
+    _typewriterAnimation = IntTween(
+      begin: 0,
+      end: companyName.length,
+    ).animate(CurvedAnimation(
+      parent: _typewriterController,
+      curve: Curves.linear,
+    ));
 
     // Animation sequence: fall from 90° to 0°, then bounce
     _rotationAnimation = TweenSequence<double>([
@@ -162,15 +181,24 @@ class _ExperienceCardState extends State<_ExperienceCard>
     // Always start with controller at 0 (rotated 90 degrees)
     _animationController.value = 0.0;
     
-    // Listen to initial animation completion to start stacking
+    // Listen to initial animation completion to start stacking and typewriter
     _animationController.addStatusListener((status) {
-      if (status == AnimationStatus.completed && !widget.isLast) {
-        // Start stacking animation after initial animation completes
-        Future.delayed(const Duration(milliseconds: 200), () {
+      if (status == AnimationStatus.completed) {
+        // Start typewriter animation after initial animation completes
+        Future.delayed(const Duration(milliseconds: 300), () {
           if (mounted) {
-            _stackingController.forward();
+            _typewriterController.forward();
           }
         });
+        
+        // Start stacking animation after initial animation completes (only for non-last cards)
+        if (!widget.isLast) {
+          Future.delayed(const Duration(milliseconds: 200), () {
+            if (mounted) {
+              _stackingController.forward();
+            }
+          });
+        }
       }
     });
 
@@ -188,6 +216,7 @@ class _ExperienceCardState extends State<_ExperienceCard>
     WidgetsBinding.instance.removeObserver(this);
     _animationController.dispose();
     _stackingController.dispose();
+    _typewriterController.dispose();
     super.dispose();
   }
 
@@ -256,6 +285,7 @@ class _ExperienceCardState extends State<_ExperienceCard>
           // Reset to initial state
           _animationController.reset();
           _stackingController.reset();
+          _typewriterController.reset();
         }
       }
     } catch (e) {
@@ -357,12 +387,29 @@ class _ExperienceCardState extends State<_ExperienceCard>
       width: cardWidth,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            AppColors.surface.withValues(alpha: 0.95),
+            AppColors.surface,
+            AppColors.surfaceLight.withValues(alpha: 0.8),
+          ],
+          stops: const [0.0, 0.5, 1.0],
+        ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.2),
-          width: 1,
+          color: AppColors.primary.withValues(alpha: 0.5),
+          width: 2,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.1),
+            blurRadius: 20,
+            spreadRadius: 0,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -379,12 +426,23 @@ class _ExperienceCardState extends State<_ExperienceCard>
                       style: AppTextStyles.heading4(context),
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      widget.experience.company,
-                      style: AppTextStyles.bodyLarge(context).copyWith(
-                        color: AppColors.primaryLight,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    AnimatedBuilder(
+                      animation: _typewriterAnimation,
+                      builder: (context, child) {
+                        final companyName = widget.experience.company;
+                        final visibleLength = _typewriterAnimation.value;
+                        final visibleText = companyName.substring(
+                          0,
+                          visibleLength.clamp(0, companyName.length),
+                        );
+                        return Text(
+                          visibleText,
+                          style: AppTextStyles.bodyLarge(context).copyWith(
+                            color: AppColors.primaryLight,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -524,12 +582,29 @@ class _ExperienceCardState extends State<_ExperienceCard>
           child: Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  AppColors.surface.withValues(alpha: 0.95),
+                  AppColors.surface,
+                  AppColors.surfaceLight.withValues(alpha: 0.8),
+                ],
+                stops: const [0.0, 0.5, 1.0],
+              ),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: AppColors.primary.withValues(alpha: 0.2),
-                width: 1,
+                color: AppColors.primary.withValues(alpha: 0.5),
+                width: 2,
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                  blurRadius: 20,
+                  spreadRadius: 0,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -539,12 +614,23 @@ class _ExperienceCardState extends State<_ExperienceCard>
             style: AppTextStyles.heading4(context),
           ),
           const SizedBox(height: 4),
-          Text(
-            widget.experience.company,
-            style: AppTextStyles.bodyMedium(context).copyWith(
-              color: AppColors.primaryLight,
-              fontWeight: FontWeight.w600,
-            ),
+          AnimatedBuilder(
+            animation: _typewriterAnimation,
+            builder: (context, child) {
+              final companyName = widget.experience.company;
+              final visibleLength = _typewriterAnimation.value;
+              final visibleText = companyName.substring(
+                0,
+                visibleLength.clamp(0, companyName.length),
+              );
+              return Text(
+                visibleText,
+                style: AppTextStyles.bodyMedium(context).copyWith(
+                  color: AppColors.primaryLight,
+                  fontWeight: FontWeight.w600,
+                ),
+              );
+            },
           ),
           const SizedBox(height: 8),
           Row(
