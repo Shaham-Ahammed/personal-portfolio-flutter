@@ -1,42 +1,182 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../constants/colors.dart';
 import '../constants/text_styles.dart';
 import '../constants/portfolio_data.dart';
 import '../models/experience_model.dart';
 
-class ExperienceSection extends StatelessWidget {
+class ExperienceSection extends StatefulWidget {
   const ExperienceSection({super.key});
+
+  @override
+  State<ExperienceSection> createState() => _ExperienceSectionState();
+}
+
+class _ExperienceSectionState extends State<ExperienceSection>
+    with WidgetsBindingObserver {
+  final GlobalKey _sectionKey = GlobalKey();
+  bool _sectionAnimated = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    // Check visibility after multiple frames to ensure layout is complete
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (mounted) {
+          _checkSectionVisibility();
+          _startPeriodicVisibilityCheck();
+          // Fallback: if section is already mostly visible, trigger animation
+          Future.delayed(const Duration(milliseconds: 500), () {
+            if (mounted && !_sectionAnimated) {
+              _checkSectionVisibility();
+            }
+          });
+        }
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  void _startPeriodicVisibilityCheck() {
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (mounted) {
+        _checkSectionVisibility();
+        _startPeriodicVisibilityCheck();
+      }
+    });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && mounted) {
+      _checkSectionVisibility();
+    }
+  }
+
+  double _getVisibilityThreshold() {
+    final experienceCount = PortfolioData.experiences.length;
+    if (experienceCount >= 5) {
+      return 0.45; // 45% for 5 or more elements
+    } else if (experienceCount == 4) {
+      return 0.60; // 60% for exactly 4 elements
+    } else if (experienceCount >= 3) {
+      return 0.70; // 70% for 3 or more elements
+    } else {
+      return 0.70; // Default to 70% for less than 3 elements
+    }
+  }
+
+  void _checkSectionVisibility() {
+    if (!mounted) return;
+
+    final context = _sectionKey.currentContext;
+    if (context == null || !context.mounted) return;
+
+    final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
+    if (renderBox == null || !renderBox.hasSize) return;
+
+    try {
+      final position = renderBox.localToGlobal(Offset.zero);
+      final widgetSize = renderBox.size;
+      final screenSize = MediaQuery.of(context).size;
+      final screenHeight = screenSize.height;
+
+      final viewportTop = 0.0;
+      final viewportBottom = screenHeight;
+
+      final widgetTop = position.dy;
+      final widgetBottom = widgetTop + widgetSize.height;
+
+      final visibleTop = widgetTop.clamp(viewportTop, viewportBottom);
+      final visibleBottom = widgetBottom.clamp(viewportTop, viewportBottom);
+      final visibleHeight = (visibleBottom - visibleTop).clamp(0.0, widgetSize.height);
+
+      if (widgetSize.height > 0) {
+        final visibilityPercentage = visibleHeight / widgetSize.height;
+        final isInViewport = widgetBottom > viewportTop && widgetTop < viewportBottom;
+        final threshold = _getVisibilityThreshold();
+        final shouldBeAnimated = isInViewport && visibilityPercentage >= threshold;
+
+        final isCompletelyOutOfView = widgetBottom <= viewportTop || widgetTop >= viewportBottom;
+
+        if (shouldBeAnimated && !_sectionAnimated && mounted) {
+          setState(() {
+            _sectionAnimated = true;
+          });
+        } else if (isCompletelyOutOfView && _sectionAnimated && mounted) {
+          setState(() {
+            _sectionAnimated = false;
+          });
+        }
+      }
+    } catch (e) {
+      // Silently handle errors
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final isMobile = size.width < 768;
 
-    return Container(
-      width: double.infinity,
-      constraints: BoxConstraints(
-        minHeight: size.height,
-      ),
-      color: AppColors.backgroundLight,
-      padding: EdgeInsets.symmetric(
-        horizontal: isMobile ? 20 : 60,
-        vertical: isMobile ? 60 : 100,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'EXPERIENCE',
-            style: AppTextStyles.sectionTitle(context),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'My Career Journey',
-            style: AppTextStyles.heading2(context),
-          ),
-          const SizedBox(height: 60),
-          _buildExperiencesList(context, isMobile),
-        ],
+    // Check visibility after build completes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        Future.delayed(const Duration(milliseconds: 50), () {
+          if (mounted) {
+            _checkSectionVisibility();
+          }
+        });
+      }
+    });
+
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        if (notification is ScrollUpdateNotification ||
+            notification is ScrollEndNotification ||
+            notification is ScrollStartNotification) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              _checkSectionVisibility();
+            }
+          });
+        }
+        return false;
+      },
+      child: Container(
+        key: _sectionKey,
+        width: double.infinity,
+        constraints: BoxConstraints(
+          minHeight: size.height,
+        ),
+        color: AppColors.backgroundLight,
+        padding: EdgeInsets.symmetric(
+          horizontal: isMobile ? 20 : 60,
+          vertical: isMobile ? 60 : 100,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'EXPERIENCE',
+              style: AppTextStyles.sectionTitle(context),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'My Career Journey',
+              style: AppTextStyles.heading2(context),
+            ),
+            const SizedBox(height: 60),
+            _buildExperiencesList(context, isMobile),
+          ],
+        ),
       ),
     );
   }
@@ -52,12 +192,13 @@ class ExperienceSection extends StatelessWidget {
                 .asMap()
                 .entries
                 .map((entry) => Padding(
-                      padding: const EdgeInsets.only(bottom: 32),
+                      padding: const EdgeInsets.only(bottom: 18),
                       child: _ExperienceCard(
                         experience: entry.value,
                         isLast: entry.key == experiences.length - 1,
                         isMobile: true,
                         index: entry.key,
+                        shouldAnimate: _sectionAnimated,
                       ),
                     ))
                 .toList(),
@@ -67,12 +208,13 @@ class ExperienceSection extends StatelessWidget {
                 .asMap()
                 .entries
                 .map((entry) => Padding(
-                      padding: const EdgeInsets.only(bottom: 40),
+                      padding: const EdgeInsets.only(bottom: 24),
                       child: _ExperienceCard(
                         experience: entry.value,
                         isLast: entry.key == experiences.length - 1,
                         isMobile: false,
                         index: entry.key,
+                        shouldAnimate: _sectionAnimated,
                       ),
                     ))
                 .toList(),
@@ -85,12 +227,14 @@ class _ExperienceCard extends StatefulWidget {
   final bool isLast;
   final bool isMobile;
   final int index;
+  final bool shouldAnimate;
 
   const _ExperienceCard({
     required this.experience,
     required this.isLast,
     required this.isMobile,
     required this.index,
+    required this.shouldAnimate,
   });
 
   @override
@@ -98,20 +242,17 @@ class _ExperienceCard extends StatefulWidget {
 }
 
 class _ExperienceCardState extends State<_ExperienceCard>
-    with TickerProviderStateMixin, WidgetsBindingObserver {
+    with TickerProviderStateMixin {
   late AnimationController _animationController;
   late AnimationController _stackingController;
   late AnimationController _typewriterController;
   late Animation<double> _rotationAnimation;
   late Animation<double> _stackingAnimation;
   late Animation<int> _typewriterAnimation;
-  final GlobalKey _cardKey = GlobalKey();
-  bool _cardAnimated = false;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200), // Slow animation
@@ -163,22 +304,18 @@ class _ExperienceCardState extends State<_ExperienceCard>
     ]).animate(_animationController);
 
     // Stacking animation: slight rotation to create stacking effect
-    // Only for non-last cards, rotates 3-5 degrees based on index
-    if (!widget.isLast) {
-      final stackingAngle = 3.0 + (widget.index * 0.5); // Slight increase per card
-      _stackingAnimation = Tween<double>(
-        begin: 0.0,
-        end: stackingAngle,
-      ).animate(CurvedAnimation(
-        parent: _stackingController,
-        curve: Curves.easeOut,
-      ));
-    } else {
-      // Last card: no stacking animation
-      _stackingAnimation = Tween<double>(begin: 0.0, end: 0.0).animate(_stackingController);
-    }
+    // Rotates 3-5 degrees based on index (all cards including last)
+    final stackingAngle = 3.0 + (widget.index * 0.5); // Slight increase per card
+    _stackingAnimation = Tween<double>(
+      begin: 0.0,
+      end: stackingAngle,
+    ).animate(CurvedAnimation(
+      parent: _stackingController,
+      curve: Curves.easeOut,
+    ));
 
-    // Always start with controller at 0 (rotated 90 degrees)
+    // Start with cards invisible (at 0.0 = 90 degrees rotated)
+    // They will only animate when shouldAnimate becomes true
     _animationController.value = 0.0;
     
     // Listen to initial animation completion to start stacking and typewriter
@@ -191,130 +328,79 @@ class _ExperienceCardState extends State<_ExperienceCard>
           }
         });
         
-        // Start stacking animation after initial animation completes (only for non-last cards)
-        if (!widget.isLast) {
-          Future.delayed(const Duration(milliseconds: 200), () {
-            if (mounted) {
-              _stackingController.forward();
-            }
-          });
-        }
+        // Start stacking animation after initial animation completes (all cards)
+        Future.delayed(const Duration(milliseconds: 200), () {
+          if (mounted) {
+            _stackingController.forward();
+          }
+        });
       }
     });
 
-    // Start checking visibility after first frame
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _checkCardVisibility();
-        _startPeriodicVisibilityCheck();
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    _animationController.dispose();
-    _stackingController.dispose();
-    _typewriterController.dispose();
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed && mounted) {
-      _checkCardVisibility();
-    }
-  }
-
-  void _startPeriodicVisibilityCheck() {
-    Future.delayed(const Duration(milliseconds: 100), () {
-      if (mounted) {
-        _checkCardVisibility();
-        _startPeriodicVisibilityCheck();
-      }
-    });
-  }
-
-  void _checkCardVisibility() {
-    if (!mounted) return;
-
-    final context = _cardKey.currentContext;
-    if (context == null || !context.mounted) return;
-
-    final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
-    if (renderBox == null || !renderBox.hasSize) return;
-
-    try {
-      final position = renderBox.localToGlobal(Offset.zero);
-      final widgetSize = renderBox.size;
-      final screenSize = MediaQuery.of(context).size;
-      final screenHeight = screenSize.height;
-
-      final viewportTop = 0.0;
-      final viewportBottom = screenHeight;
-
-      final widgetTop = position.dy;
-      final widgetBottom = widgetTop + widgetSize.height;
-
-      final visibleTop = widgetTop.clamp(viewportTop, viewportBottom);
-      final visibleBottom = widgetBottom.clamp(viewportTop, viewportBottom);
-      final visibleHeight = (visibleBottom - visibleTop).clamp(0.0, widgetSize.height);
-
-      if (widgetSize.height > 0) {
-        final visibilityPercentage = visibleHeight / widgetSize.height;
-        final isInViewport = widgetBottom > viewportTop && widgetTop < viewportBottom;
-        final shouldBeAnimated = isInViewport && visibilityPercentage >= 0.70; // 70% threshold
-
-        final isCompletelyOutOfView = widgetBottom <= viewportTop || widgetTop >= viewportBottom;
-
-        if (shouldBeAnimated && !_cardAnimated && mounted) {
-          setState(() {
-            _cardAnimated = true;
-          });
+    // Only start animation if shouldAnimate is already true
+    if (widget.shouldAnimate) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
           // Start animation with staggered delay based on index
           Future.delayed(Duration(milliseconds: widget.index * 150), () {
             if (mounted) {
               _animationController.forward();
             }
           });
-        } else if (isCompletelyOutOfView && _cardAnimated && mounted) {
-          setState(() {
-            _cardAnimated = false;
-          });
-          // Reset to initial state
-          _animationController.reset();
-          _stackingController.reset();
-          _typewriterController.reset();
         }
+      });
+    }
+  }
+
+  @override
+  void didUpdateWidget(_ExperienceCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    
+    if (widget.shouldAnimate && !oldWidget.shouldAnimate) {
+      // Section became 60% visible - start animation from invisible state
+      // Ensure we're at start position (invisible)
+      if (_animationController.value != 0.0) {
+        _animationController.value = 0.0;
       }
-    } catch (e) {
-      // Silently handle errors
+      _stackingController.reset();
+      _typewriterController.reset();
+      // Start animation with staggered delay based on index
+      Future.delayed(Duration(milliseconds: widget.index * 150), () {
+        if (mounted && widget.shouldAnimate) {
+          _animationController.forward();
+        }
+      });
+    } else if (!widget.shouldAnimate && oldWidget.shouldAnimate) {
+      // Section went out of view - reset to invisible state
+      _animationController.reset();
+      _stackingController.reset();
+      _typewriterController.reset();
+    }
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    _stackingController.dispose();
+    _typewriterController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _launchCompanyWebsite() async {
+    final website = widget.experience.website;
+    if (website != null && website.isNotEmpty) {
+      final uri = Uri.parse(website);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return NotificationListener<ScrollNotification>(
-      onNotification: (notification) {
-        if (notification is ScrollUpdateNotification ||
-            notification is ScrollEndNotification ||
-            notification is ScrollStartNotification) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              _checkCardVisibility();
-            }
-          });
-        }
-        return false;
-      },
-      child: Container(
-        key: _cardKey,
-        child: widget.isMobile
-            ? _buildMobileCard(context)
-            : _buildDesktopCard(context),
-      ),
-    );
+    return widget.isMobile
+        ? _buildMobileCard(context)
+        : _buildDesktopCard(context);
   }
 
   Widget _buildDesktopCard(BuildContext context) {
@@ -435,11 +521,25 @@ class _ExperienceCardState extends State<_ExperienceCard>
                           0,
                           visibleLength.clamp(0, companyName.length),
                         );
-                        return Text(
-                          visibleText,
-                          style: AppTextStyles.bodyLarge(context).copyWith(
-                            color: AppColors.primaryLight,
-                            fontWeight: FontWeight.w600,
+                        final hasWebsite = widget.experience.website != null && 
+                                         widget.experience.website!.isNotEmpty;
+                        return GestureDetector(
+                          onTap: hasWebsite ? _launchCompanyWebsite : null,
+                          child: MouseRegion(
+                            cursor: hasWebsite 
+                                ? SystemMouseCursors.click 
+                                : SystemMouseCursors.basic,
+                            child: Text(
+                              visibleText,
+                              style: AppTextStyles.bodyLarge(context).copyWith(
+                                color: AppColors.primaryLight,
+                                fontWeight: FontWeight.w600,
+                                decoration: hasWebsite 
+                                    ? TextDecoration.underline 
+                                    : TextDecoration.none,
+                                decorationColor: AppColors.primaryLight,
+                              ),
+                            ),
                           ),
                         );
                       },
@@ -538,7 +638,7 @@ class _ExperienceCardState extends State<_ExperienceCard>
                       alignment: pivotAlignment, // Pivot at left edge (hinge) - this stays fixed
                       transform: Matrix4.identity()
                         ..setEntry(3, 2, 0.001)
-                        ..rotateZ(stackingZ * 1.15), // Slightly more: right end comes down a bit more
+                        ..rotateZ(stackingZ * 1.0), // Increased: more downward tilt
                       child: cardWidget,
                     ),
                   ),
@@ -556,7 +656,7 @@ class _ExperienceCardState extends State<_ExperienceCard>
                       alignment: pivotAlignment, // Pivot at right edge (hinge) - this stays fixed
                       transform: Matrix4.identity()
                         ..setEntry(3, 2, 0.001)
-                        ..rotateZ(-stackingZ * 0.6), // Increased: left end comes down more
+                        ..rotateZ(-stackingZ * 1.0), // Increased: more downward tilt
                       child: cardWidget,
                     ),
                   ),
@@ -623,11 +723,25 @@ class _ExperienceCardState extends State<_ExperienceCard>
                 0,
                 visibleLength.clamp(0, companyName.length),
               );
-              return Text(
-                visibleText,
-                style: AppTextStyles.bodyMedium(context).copyWith(
-                  color: AppColors.primaryLight,
-                  fontWeight: FontWeight.w600,
+              final hasWebsite = widget.experience.website != null && 
+                               widget.experience.website!.isNotEmpty;
+              return GestureDetector(
+                onTap: hasWebsite ? _launchCompanyWebsite : null,
+                child: MouseRegion(
+                  cursor: hasWebsite 
+                      ? SystemMouseCursors.click 
+                      : SystemMouseCursors.basic,
+                  child: Text(
+                    visibleText,
+                    style: AppTextStyles.bodyMedium(context).copyWith(
+                      color: AppColors.primaryLight,
+                      fontWeight: FontWeight.w600,
+                      decoration: hasWebsite 
+                          ? TextDecoration.underline 
+                          : TextDecoration.none,
+                      decorationColor: AppColors.primaryLight,
+                    ),
+                  ),
                 ),
               );
             },

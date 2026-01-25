@@ -209,6 +209,7 @@ I love problem solving and breaking down complex challenges into simple, practic
       'description':
           'Leading development of mobile applications using Flutter. Mentoring junior developers and architecting scalable solutions.',
       'technologies': ['Flutter', 'Dart', 'Firebase', 'AWS'],
+      'website': 'https://www.example.com',
     },
     {
       'title': 'Software Developer',
@@ -218,6 +219,27 @@ I love problem solving and breaking down complex challenges into simple, practic
       'description':
           'Developed full-stack web applications using React and Node.js. Collaborated with cross-functional teams to deliver high-quality products.',
       'technologies': ['React', 'Node.js', 'MongoDB', 'Docker'],
+      'website': 'https://www.example.com',
+    },
+     {
+      'title': 'Software Developer',
+      'company': 'Startup XYZ',
+      'location': 'Remote',
+      'period': '2020 - 2022',
+      'description':
+          'Developed full-stack web applications using React and Node.js. Collaborated with cross-functional teams to deliver high-quality products.',
+      'technologies': ['React', 'Node.js', 'MongoDB', 'Docker'],
+      'website': 'https://www.example.com',
+    },
+     {
+      'title': 'Software Developer',
+      'company': 'Startup XYZ',
+      'location': 'Remote',
+      'period': '2020 - 2022',
+      'description':
+          'Developed full-stack web applications using React and Node.js. Collaborated with cross-functional teams to deliver high-quality products.',
+      'technologies': ['React', 'Node.js', 'MongoDB', 'Docker'],
+      'website': 'https://www.example.com',
     },
     {
       'title': 'Junior Developer',
@@ -227,6 +249,7 @@ I love problem solving and breaking down complex challenges into simple, practic
       'description':
           'Built responsive websites and mobile applications. Gained experience in various technologies and frameworks.',
       'technologies': ['JavaScript', 'React', 'Python', 'SQL'],
+      'website': 'https://www.example.com',
     },
   ];
 }

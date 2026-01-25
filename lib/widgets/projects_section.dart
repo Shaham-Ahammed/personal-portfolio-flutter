@@ -197,7 +197,9 @@ class _ProjectsSectionState extends State<ProjectsSection>
 
             // Main Projects Section
             if (mainProjects.isNotEmpty) ...[
-              _buildMainProjectsCarousel(context, mainProjects, isMobile),
+              _VisibilityDetectedMainProjects(
+                child: _buildMainProjectsCarousel(context, mainProjects, isMobile),
+              ),
               const SizedBox(height: 80),
             ],
 
@@ -396,6 +398,151 @@ class _ProjectsSectionState extends State<ProjectsSection>
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _VisibilityDetectedMainProjects extends StatefulWidget {
+  final Widget child;
+
+  const _VisibilityDetectedMainProjects({
+    required this.child,
+  });
+
+  @override
+  State<_VisibilityDetectedMainProjects> createState() =>
+      _VisibilityDetectedMainProjectsState();
+}
+
+class _VisibilityDetectedMainProjectsState
+    extends State<_VisibilityDetectedMainProjects>
+    with TickerProviderStateMixin, WidgetsBindingObserver {
+  final GlobalKey _widgetKey = GlobalKey();
+  late AnimationController _fadeController;
+  late Animation<double> _fadeAnimation;
+  bool _hasAnimated = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    
+    // Initialize fade animation controller
+    _fadeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    
+    // Fade animation from 0 to 1
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeIn,
+    ));
+    
+    // Start with opacity at 0 (invisible)
+    _fadeController.value = 0.0;
+    
+    // Check visibility after first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (mounted) {
+          _checkVisibility();
+          _startPeriodicVisibilityCheck();
+        }
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _fadeController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && mounted) {
+      _checkVisibility();
+    }
+  }
+
+  void _startPeriodicVisibilityCheck() {
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (mounted && !_hasAnimated) {
+        _checkVisibility();
+        _startPeriodicVisibilityCheck();
+      }
+    });
+  }
+
+  void _checkVisibility() {
+    if (!mounted || _hasAnimated) return;
+
+    final context = _widgetKey.currentContext;
+    if (context == null || !context.mounted) return;
+
+    final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
+    if (renderBox == null || !renderBox.hasSize) return;
+
+    try {
+      final position = renderBox.localToGlobal(Offset.zero);
+      final widgetSize = renderBox.size;
+      final screenSize = MediaQuery.of(context).size;
+      final screenHeight = screenSize.height;
+
+      final viewportTop = 0.0;
+      final viewportBottom = screenHeight;
+
+      final widgetTop = position.dy;
+      final widgetBottom = widgetTop + widgetSize.height;
+
+      final visibleTop = widgetTop.clamp(viewportTop, viewportBottom);
+      final visibleBottom = widgetBottom.clamp(viewportTop, viewportBottom);
+      final visibleHeight = (visibleBottom - visibleTop).clamp(0.0, widgetSize.height);
+
+      if (widgetSize.height > 0) {
+        final visibilityPercentage = visibleHeight / widgetSize.height;
+        final isInViewport = widgetBottom > viewportTop && widgetTop < viewportBottom;
+        final shouldFadeIn = isInViewport && visibilityPercentage >= 0.70; // 70% threshold
+
+        if (shouldFadeIn && !_hasAnimated && mounted) {
+          setState(() {
+            _hasAnimated = true;
+          });
+          _fadeController.forward();
+        }
+      }
+    } catch (e) {
+      // Silently handle errors
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        if (notification is ScrollUpdateNotification ||
+            notification is ScrollEndNotification ||
+            notification is ScrollStartNotification) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted && !_hasAnimated) {
+              _checkVisibility();
+            }
+          });
+        }
+        return false;
+      },
+      child: FadeTransition(
+        opacity: _fadeAnimation,
+        child: Container(
+          key: _widgetKey,
+          child: widget.child,
+        ),
       ),
     );
   }
@@ -948,6 +1095,7 @@ class _AnimatedMiniProjectCardState extends State<_AnimatedMiniProjectCard>
   late Animation<double> _slideAnimation;
   late Animation<double> _opacityAnimation;
   late Animation<double> _forwardAnimation;
+  bool _hasAnimated = false;
 
   @override
   void initState() {
@@ -1036,10 +1184,18 @@ class _AnimatedMiniProjectCardState extends State<_AnimatedMiniProjectCard>
     // Always start with controller at 0 (invisible/hidden state)
     _controller.value = 0.0;
     
-    // If shouldAnimate is true, start animation
-    if (widget.shouldAnimate) {
+    // Mark as animated when animation completes
+    _controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        _hasAnimated = true;
+      }
+    });
+    
+    // If shouldAnimate is true and hasn't animated yet, start animation
+    if (widget.shouldAnimate && !_hasAnimated) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
+        if (mounted && !_hasAnimated) {
+          _hasAnimated = true;
           _controller.forward();
         }
       });
@@ -1050,14 +1206,13 @@ class _AnimatedMiniProjectCardState extends State<_AnimatedMiniProjectCard>
   void didUpdateWidget(_AnimatedMiniProjectCard oldWidget) {
     super.didUpdateWidget(oldWidget);
     
-    if (widget.shouldAnimate && !oldWidget.shouldAnimate) {
-      // Section became visible - start animation
+    if (widget.shouldAnimate && !oldWidget.shouldAnimate && !_hasAnimated) {
+      // Section became visible - start animation only if not already played
+      _hasAnimated = true;
       _controller.reset();
       _controller.forward();
-    } else if (!widget.shouldAnimate && oldWidget.shouldAnimate) {
-      // Section went out of view - reset to invisible state
-      _controller.reset();
     }
+    // Don't reset when section goes out of view - keep the animation state
   }
 
   @override
