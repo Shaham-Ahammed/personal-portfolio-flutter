@@ -947,37 +947,73 @@ class _AnimatedMiniProjectCardState extends State<_AnimatedMiniProjectCard>
   late AnimationController _controller;
   late Animation<double> _slideAnimation;
   late Animation<double> _opacityAnimation;
+  late Animation<double> _forwardAnimation;
 
   @override
   void initState() {
     super.initState();
     // Total duration should accommodate all staggered animations
-    // Assuming max 10 cards: 10 * 0.1s delay + 0.6s animation = 1.6s
+    // Assuming max 10 cards: 10 * 0.1s delay + 0.8s animation = 1.8s (increased for bounce effect)
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1600),
+      duration: const Duration(milliseconds: 1800),
     );
 
     // Calculate staggered delay - each card starts 0.1 seconds (100ms) after the previous
-    // Convert to fraction of total duration (1600ms)
+    // Convert to fraction of total duration (1800ms)
     final delaySeconds = widget.index * 0.1;
-    final animationDurationSeconds = 0.6;
-    final totalDurationSeconds = 1.6;
+    final animationDurationSeconds = 0.8; // Increased duration for bounce effect
+    final totalDurationSeconds = 1.8;
     
     final delayFraction = (delaySeconds / totalDurationSeconds).clamp(0.0, 1.0);
     final endFraction = ((delaySeconds + animationDurationSeconds) / totalDurationSeconds).clamp(0.0, 1.0);
     
-    // Slide animation from left (-200) to right (0)
-    _slideAnimation = Tween<double>(
-      begin: -200.0,
-      end: 0.0,
-    ).animate(
+    // Slide animation with overshoot: from left (-200) to overshoot (20) then back to (0)
+    _slideAnimation = TweenSequence<double>([
+      // First phase: slide from -200 to 20 (overshoot forward)
+      TweenSequenceItem(
+        tween: Tween<double>(begin: -200.0, end: 20.0)
+            .chain(CurveTween(curve: Curves.easeOutCubic)),
+        weight: 70.0, // 70% of animation time
+      ),
+      // Second phase: settle back to 0 (final position)
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 20.0, end: 0.0)
+            .chain(CurveTween(curve: Curves.easeInOut)),
+        weight: 30.0, // 30% of animation time
+      ),
+    ]).animate(
       CurvedAnimation(
         parent: _controller,
         curve: Interval(
           delayFraction,
           endFraction,
-          curve: Curves.easeOutCubic,
+          curve: Curves.linear,
+        ),
+      ),
+    );
+
+    // Forward animation (scale/translateZ effect) - goes forward then back
+    _forwardAnimation = TweenSequence<double>([
+      // First phase: move forward (scale up or translateZ forward)
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 0.0, end: 1.0)
+            .chain(CurveTween(curve: Curves.easeOutCubic)),
+        weight: 70.0,
+      ),
+      // Second phase: settle back to original position
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.0, end: 0.0)
+            .chain(CurveTween(curve: Curves.easeInOut)),
+        weight: 30.0,
+      ),
+    ]).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Interval(
+          delayFraction,
+          endFraction,
+          curve: Curves.linear,
         ),
       ),
     );
@@ -1039,22 +1075,35 @@ class _AnimatedMiniProjectCardState extends State<_AnimatedMiniProjectCard>
         // Get animation values, with fallbacks
         double slideValue = -200.0; // Start hidden
         double opacityValue = 0.0; // Start invisible
+        double forwardValue = 0.0; // Forward effect value
         
         try {
           slideValue = _slideAnimation.value;
           opacityValue = _opacityAnimation.value;
+          forwardValue = _forwardAnimation.value;
         } catch (e) {
           // If animation values are invalid, use initial hidden state
           slideValue = -200.0;
           opacityValue = 0.0;
+          forwardValue = 0.0;
         }
         
         // Clamp values to valid ranges
-        slideValue = slideValue.clamp(-200.0, 0.0);
+        slideValue = slideValue.clamp(-200.0, 20.0); // Allow overshoot
         opacityValue = opacityValue.clamp(0.0, 1.0);
+        forwardValue = forwardValue.clamp(0.0, 1.0);
         
-        return Transform.translate(
-          offset: Offset(slideValue, 0),
+        // Calculate forward effect: scale up slightly and translate forward in Z
+        final scale = 1.0 + (forwardValue * 0.08); // Scale up to 1.08
+        final translateZ = forwardValue * 30.0; // Move forward 30 pixels in Z
+        
+        return Transform(
+          alignment: Alignment.center,
+          transform: Matrix4.identity()
+            ..setEntry(3, 2, 0.001) // Perspective
+            ..translate(slideValue, 0.0)
+            ..translateByVector3(Vector3(0.0, 0.0, translateZ))
+            ..scale(scale),
           child: Opacity(
             opacity: opacityValue,
             child: _MiniProjectCard(
@@ -1068,11 +1117,73 @@ class _AnimatedMiniProjectCardState extends State<_AnimatedMiniProjectCard>
   }
 }
 
-class _MiniProjectCard extends StatelessWidget {
+class _MiniProjectCard extends StatefulWidget {
   final Project project;
   final bool isMobile;
 
   const _MiniProjectCard({required this.project, required this.isMobile});
+
+  @override
+  State<_MiniProjectCard> createState() => _MiniProjectCardState();
+}
+
+class _MiniProjectCardState extends State<_MiniProjectCard>
+    with SingleTickerProviderStateMixin {
+  bool _isHovered = false;
+  late AnimationController _hoverController;
+  late Animation<double> _projectionAnimation;
+  late Animation<double> _glowAnimation;
+  Offset _mousePosition = Offset.zero;
+
+  @override
+  void initState() {
+    super.initState();
+    _hoverController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _projectionAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _hoverController, curve: Curves.easeOutCubic),
+    );
+    _glowAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _hoverController, curve: Curves.easeOut),
+    );
+    // Initialize mouse position to center
+    final cardWidth = widget.isMobile ? 300.0 : 340.0;
+    final cardHeight = widget.isMobile ? 360.0 : 400.0;
+    _mousePosition = Offset(cardWidth / 2, cardHeight / 2);
+  }
+
+  @override
+  void dispose() {
+    _hoverController.dispose();
+    super.dispose();
+  }
+
+  void _onHover(bool hover) {
+    setState(() {
+      _isHovered = hover;
+      if (!hover) {
+        // Reset to center when not hovering
+        final cardWidth = widget.isMobile ? 300.0 : 340.0;
+        final cardHeight = widget.isMobile ? 360.0 : 400.0;
+        _mousePosition = Offset(cardWidth / 2, cardHeight / 2);
+      }
+    });
+    if (hover) {
+      _hoverController.forward();
+    } else {
+      _hoverController.reverse();
+    }
+  }
+
+  void _onHoverMove(PointerEvent event) {
+    if (_isHovered) {
+      setState(() {
+        _mousePosition = event.localPosition;
+      });
+    }
+  }
 
   Future<void> _launchUrl(String? url) async {
     if (url != null && url.isNotEmpty) {
@@ -1085,18 +1196,93 @@ class _MiniProjectCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-      
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: AppColors.primary.withValues(alpha: 0.3),
-            width: 1.5,
-          ),
-        ),
-        child: Stack(
+    return Listener(
+      onPointerMove: _onHoverMove,
+      child: MouseRegion(
+        onEnter: (_) => _onHover(true),
+        onExit: (_) => _onHover(false),
+        child: AnimatedBuilder(
+          animation: _hoverController,
+          builder: (context, child) {
+            // Calculate 3D projection based on mouse position
+            final cardWidth = widget.isMobile ? 300.0 : 340.0;
+            final cardHeight = widget.isMobile ? 360.0 : 400.0;
+            
+            // Normalize mouse position to -1 to 1 range
+            // Use center as default if not hovered
+            final normalizedX = _isHovered && _mousePosition.dx > 0
+                ? ((_mousePosition.dx / cardWidth) * 2 - 1).clamp(-1.0, 1.0)
+                : 0.0;
+            final normalizedY = _isHovered && _mousePosition.dy > 0
+                ? ((_mousePosition.dy / cardHeight) * 2 - 1).clamp(-1.0, 1.0)
+                : 0.0;
+            
+            // Apply projection effect only when hovered
+            final projectionValue = _projectionAnimation.value;
+            final rotateX = normalizedY * 8.0 * projectionValue; // Max 8 degrees
+            final rotateY = -normalizedX * 8.0 * projectionValue; // Max 8 degrees
+            final translateZ = 50.0 * projectionValue; // Move forward 50px for more elevation
+            final scale = 1.0 + (0.08 * projectionValue); // Scale up 8% for more prominence
+            
+            // Calculate glow intensity
+            final glowIntensity = _glowAnimation.value;
+          
+          return Transform(
+            alignment: Alignment.center,
+            transform: Matrix4.identity()
+              ..setEntry(3, 2, 0.001) // Perspective
+              ..translateByVector3(Vector3(0.0, 0.0, translateZ))
+              ..rotateX(rotateX * (3.14159 / 180)) // Convert degrees to radians
+              ..rotateY(rotateY * (3.14159 / 180))
+              ..scale(scale),
+            child: Container(
+              // Outer container for neon glow effect
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  // Multiple layered shadows for neon glow effect
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.8 * glowIntensity),
+                    blurRadius: 8 * glowIntensity,
+                    spreadRadius: 2 * glowIntensity,
+                  ),
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.6 * glowIntensity),
+                    blurRadius: 16 * glowIntensity,
+                    spreadRadius: 1 * glowIntensity,
+                  ),
+                  BoxShadow(
+                    color: AppColors.primaryLight.withValues(alpha: 0.7 * glowIntensity),
+                    blurRadius: 24 * glowIntensity,
+                    spreadRadius: 0.5 * glowIntensity,
+                  ),
+                  BoxShadow(
+                    color: AppColors.primaryLight.withValues(alpha: 0.5 * glowIntensity),
+                    blurRadius: 32 * glowIntensity,
+                    spreadRadius: 0 * glowIntensity,
+                  ),
+                  // Elevation shadow
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.3 * glowIntensity),
+                    blurRadius: 40 * glowIntensity,
+                    spreadRadius: 0,
+                    offset: Offset(0, 10 * glowIntensity),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: AppColors.primary.withValues(
+                        alpha: 0.3 + (0.7 * glowIntensity),
+                      ),
+                      width: 1.5 + (1.5 * glowIntensity),
+                    ),
+                  ),
+                  child: Stack(
           children: [
             // Expanded image area with raindrop blur effect
             Positioned.fill(
@@ -1108,7 +1294,7 @@ class _MiniProjectCard extends StatelessWidget {
                     // Main image
                     Image.network(
                       
-                      project.imageUrl,
+                      widget.project.imageUrl,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
@@ -1198,7 +1384,7 @@ class _MiniProjectCard extends StatelessWidget {
                             ),
                           ),
                           child: Text(
-                            project.title,
+                            widget.project.title,
                             style: AppTextStyles.heading4(context).copyWith(
                               color: AppColors.textPrimary,
                               fontWeight: FontWeight.bold,
@@ -1246,7 +1432,7 @@ class _MiniProjectCard extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: Text(
-                                  project.description,
+                                  widget.project.description,
                                   style: AppTextStyles.bodySmall(context).copyWith(
                                     color: AppColors.textSecondary,
                                   ),
@@ -1258,7 +1444,7 @@ class _MiniProjectCard extends StatelessWidget {
                               Wrap(
                                 spacing: 6,
                                 runSpacing: 6,
-                                children: project.technologies
+                                children: widget.project.technologies
                                     .take(3)
                                     .map(
                                       (tech) => ClipRRect(
@@ -1297,62 +1483,62 @@ class _MiniProjectCard extends StatelessWidget {
                                 builder: (context) {
                                   final buttons = <Widget>[];
 
-                                  if (project.githubUrl != null) {
+                                  if (widget.project.githubUrl != null) {
                                     buttons.add(
                                       _ActionButton(
                                         icon: Icons.code,
                                         label: 'Code',
-                                        onTap: () => _launchUrl(project.githubUrl),
+                                        onTap: () => _launchUrl(widget.project.githubUrl),
                                         isSmall: true,
                                       ),
                                     );
                                   }
-                                  if (project.iosUrl != null) {
+                                  if (widget.project.iosUrl != null) {
                                     buttons.add(
                                       _ActionButton(
                                         icon: Icons.phone_iphone,
                                         label: 'iOS',
-                                        onTap: () => _launchUrl(project.iosUrl),
+                                        onTap: () => _launchUrl(widget.project.iosUrl),
                                         isSmall: true,
                                       ),
                                     );
                                   }
-                                  if (project.androidUrl != null) {
+                                  if (widget.project.androidUrl != null) {
                                     buttons.add(
                                       _ActionButton(
                                         icon: Icons.android,
                                         label: 'Android',
-                                        onTap: () => _launchUrl(project.androidUrl),
+                                        onTap: () => _launchUrl(widget.project.androidUrl),
                                         isSmall: true,
                                       ),
                                     );
                                   }
-                                  if (project.userAndroidUrl != null) {
+                                  if (widget.project.userAndroidUrl != null) {
                                     buttons.add(
                                       _ActionButton(
                                         icon: Icons.android,
                                         label: 'User APK',
-                                        onTap: () => _launchUrl(project.userAndroidUrl),
+                                        onTap: () => _launchUrl(widget.project.userAndroidUrl),
                                         isSmall: true,
                                       ),
                                     );
                                   }
-                                  if (project.adminAndroidUrl != null) {
+                                  if (widget.project.adminAndroidUrl != null) {
                                     buttons.add(
                                       _ActionButton(
                                         icon: Icons.admin_panel_settings,
                                         label: 'Admin APK',
-                                        onTap: () => _launchUrl(project.adminAndroidUrl),
+                                        onTap: () => _launchUrl(widget.project.adminAndroidUrl),
                                         isSmall: true,
                                       ),
                                     );
                                   }
-                                  if (project.webUrl != null) {
+                                  if (widget.project.webUrl != null) {
                                     buttons.add(
                                       _ActionButton(
                                         icon: Icons.language,
                                         label: 'Web',
-                                        onTap: () => _launchUrl(project.webUrl),
+                                        onTap: () => _launchUrl(widget.project.webUrl),
                                         isSmall: true,
                                       ),
                                     );
@@ -1394,6 +1580,12 @@ class _MiniProjectCard extends StatelessWidget {
               ),
             ),
           ],
+                  ),
+                ),
+              ),
+            ),
+          );
+          },
         ),
       ),
     );
