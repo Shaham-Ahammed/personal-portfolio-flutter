@@ -153,7 +153,8 @@ I love problem solving and breaking down complex challenges into simple, practic
       'description':
           'A streaming app that mimics Netflix, allowing users to browse movies and TV shows with detailed content views.',
       'technologies': ['TMDB API', 'REST API', 'HTTP'],
-      'imageUrl': 'https://res.cloudinary.com/dilbmyvfv/image/upload/v1769331544/Screenshot_2026-01-25_at_11.58.07_AM_gz5bno.png',
+      'imageUrl':
+          'https://res.cloudinary.com/dilbmyvfv/image/upload/v1769331544/Screenshot_2026-01-25_at_11.58.07_AM_gz5bno.png',
       'githubUrl': 'https://github.com/Shaham-Ahammed/neflix_clone',
       'type': 'mini',
     },
@@ -183,7 +184,8 @@ I love problem solving and breaking down complex challenges into simple, practic
       'description':
           'A weather app that provides real-time weather information based on user searches.',
       'technologies': ['Bloc', 'HTTP'],
-      'imageUrl': 'https://res.cloudinary.com/dilbmyvfv/image/upload/v1769329926/Screenshot_2026-01-25_at_11.31.41_AM_fb2pps.png',
+      'imageUrl':
+          'https://res.cloudinary.com/dilbmyvfv/image/upload/v1769329926/Screenshot_2026-01-25_at_11.31.41_AM_fb2pps.png',
       'githubUrl': 'https://github.com/Shaham-Ahammed/weather-app-bloc-and-api',
       'type': 'mini',
     },
@@ -192,7 +194,8 @@ I love problem solving and breaking down complex challenges into simple, practic
       'title': 'Tic Tac Toe Game',
       'description': 'A simple and fun Tic Tac Toe game.',
       'technologies': ['2D array'],
-      'imageUrl': 'https://res.cloudinary.com/dilbmyvfv/image/upload/v1769329703/Screenshot_2026-01-25_at_11.25.31_AM_jqxn6s.png',
+      'imageUrl':
+          'https://res.cloudinary.com/dilbmyvfv/image/upload/v1769329703/Screenshot_2026-01-25_at_11.25.31_AM_jqxn6s.png',
       'githubUrl':
           'https://github.com/Shaham-Ahammed/tic-tac-toe/blob/main/lib/main.dart',
       'type': 'mini',
@@ -202,13 +205,13 @@ I love problem solving and breaking down complex challenges into simple, practic
   // Experience
   static const List<Map<String, dynamic>> experiences = [
     {
-      'title': 'Senior Software Developer',
-      'company': 'Tech Company Inc.',
-      'location': 'San Francisco, CA',
-      'period': '2022 - Present',
+      'title': 'Flutter Developer',
+      'company': 'Applab',
+      'location': 'Doha, Qatar',
+      'period': '2025 - Present',
       'description':
           'Leading development of mobile applications using Flutter. Mentoring junior developers and architecting scalable solutions.',
-      'technologies': ['Flutter', 'Dart', 'Firebase', 'AWS'],
+      // 'technologies': ['Flutter', 'Dart', 'Firebase', 'AWS'],
       'website': 'https://www.example.com',
     },
     {
@@ -221,34 +224,14 @@ I love problem solving and breaking down complex challenges into simple, practic
       'technologies': ['React', 'Node.js', 'MongoDB', 'Docker'],
       'website': 'https://www.example.com',
     },
-     {
-      'title': 'Software Developer',
-      'company': 'Startup XYZ',
-      'location': 'Remote',
-      'period': '2020 - 2022',
-      'description':
-          'Developed full-stack web applications using React and Node.js. Collaborated with cross-functional teams to deliver high-quality products.',
-      'technologies': ['React', 'Node.js', 'MongoDB', 'Docker'],
-      'website': 'https://www.example.com',
-    },
-     {
-      'title': 'Software Developer',
-      'company': 'Startup XYZ',
-      'location': 'Remote',
-      'period': '2020 - 2022',
-      'description':
-          'Developed full-stack web applications using React and Node.js. Collaborated with cross-functional teams to deliver high-quality products.',
-      'technologies': ['React', 'Node.js', 'MongoDB', 'Docker'],
-      'website': 'https://www.example.com',
-    },
     {
-      'title': 'Junior Developer',
-      'company': 'Digital Agency',
-      'location': 'New York, NY',
-      'period': '2018 - 2020',
+      'title': 'Software Developer',
+      'company': 'Startup XYZ',
+      'location': 'Remote',
+      'period': '2020 - 2022',
       'description':
-          'Built responsive websites and mobile applications. Gained experience in various technologies and frameworks.',
-      'technologies': ['JavaScript', 'React', 'Python', 'SQL'],
+          'Developed full-stack web applications using React and Node.js. Collaborated with cross-functional teams to deliver high-quality products.',
+      'technologies': ['React', 'Node.js', 'MongoDB', 'Docker'],
       'website': 'https://www.example.com',
     },
   ];

@@ -529,16 +529,25 @@ class _ExperienceCardState extends State<_ExperienceCard>
                             cursor: hasWebsite 
                                 ? SystemMouseCursors.click 
                                 : SystemMouseCursors.basic,
-                            child: Text(
-                              visibleText,
-                              style: AppTextStyles.bodyLarge(context).copyWith(
-                                color: AppColors.primaryLight,
-                                fontWeight: FontWeight.w600,
-                                decoration: hasWebsite 
-                                    ? TextDecoration.underline 
-                                    : TextDecoration.none,
-                                decorationColor: AppColors.primaryLight,
-                              ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  visibleText,
+                                  style: AppTextStyles.bodyLarge(context).copyWith(
+                                    color: AppColors.primaryLight,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                if (hasWebsite) ...[
+                                  const SizedBox(width: 6),
+                                  Icon(
+                                    Icons.open_in_new,
+                                    size: 16,
+                                    color: AppColors.primaryLight,
+                                  ),
+                                ],
+                              ],
                             ),
                           ),
                         );
@@ -586,27 +595,28 @@ class _ExperienceCardState extends State<_ExperienceCard>
             widget.experience.description,
             style: AppTextStyles.bodyMedium(context),
           ),
-          const SizedBox(height: 16),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: widget.experience.technologies
-                .map((tech) => Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.surfaceLight,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        tech,
-                        style: AppTextStyles.bodySmall(context),
-                      ),
-                    ))
-                .toList(),
-          ),
+          // Technologies section hidden for now
+          // const SizedBox(height: 16),
+          // Wrap(
+          //   spacing: 8,
+          //   runSpacing: 8,
+          //   children: widget.experience.technologies
+          //       .map((tech) => Container(
+          //             padding: const EdgeInsets.symmetric(
+          //               horizontal: 12,
+          //               vertical: 6,
+          //             ),
+          //             decoration: BoxDecoration(
+          //               color: AppColors.surfaceLight,
+          //               borderRadius: BorderRadius.circular(20),
+          //             ),
+          //             child: Text(
+          //               tech,
+          //               style: AppTextStyles.bodySmall(context),
+          //             ),
+          //           ))
+          //       .toList(),
+          // ),
         ],
       ),
     );
@@ -731,16 +741,25 @@ class _ExperienceCardState extends State<_ExperienceCard>
                   cursor: hasWebsite 
                       ? SystemMouseCursors.click 
                       : SystemMouseCursors.basic,
-                  child: Text(
-                    visibleText,
-                    style: AppTextStyles.bodyMedium(context).copyWith(
-                      color: AppColors.primaryLight,
-                      fontWeight: FontWeight.w600,
-                      decoration: hasWebsite 
-                          ? TextDecoration.underline 
-                          : TextDecoration.none,
-                      decorationColor: AppColors.primaryLight,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        visibleText,
+                        style: AppTextStyles.bodyMedium(context).copyWith(
+                          color: AppColors.primaryLight,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      if (hasWebsite) ...[
+                        const SizedBox(width: 6),
+                        Icon(
+                          Icons.open_in_new,
+                          size: 14,
+                          color: AppColors.primaryLight,
+                        ),
+                      ],
+                    ],
                   ),
                 ),
               );
@@ -789,29 +808,30 @@ class _ExperienceCardState extends State<_ExperienceCard>
             widget.experience.description,
             style: AppTextStyles.bodyMedium(context),
           ),
-          const SizedBox(height: 16),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: widget.experience.technologies
-                .map((tech) => Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.surfaceLight,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        tech,
-                        style: AppTextStyles.bodySmall(context).copyWith(
-                          fontSize: 12,
-                        ),
-                      ),
-                    ))
-                .toList(),
-          ),
+          // Technologies section hidden for now
+          // const SizedBox(height: 16),
+          // Wrap(
+          //   spacing: 8,
+          //   runSpacing: 8,
+          //   children: widget.experience.technologies
+          //       .map((tech) => Container(
+          //             padding: const EdgeInsets.symmetric(
+          //               horizontal: 10,
+          //               vertical: 6,
+          //             ),
+          //             decoration: BoxDecoration(
+          //               color: AppColors.surfaceLight,
+          //               borderRadius: BorderRadius.circular(20),
+          //             ),
+          //             child: Text(
+          //               tech,
+          //               style: AppTextStyles.bodySmall(context).copyWith(
+          //                 fontSize: 12,
+          //               ),
+          //             ),
+          //           ))
+          //       .toList(),
+          // ),
         ],
             ),
           ),

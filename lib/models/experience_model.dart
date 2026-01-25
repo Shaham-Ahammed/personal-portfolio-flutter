@@ -24,7 +24,9 @@ class Experience {
       location: map['location'] as String,
       period: map['period'] as String,
       description: map['description'] as String,
-      technologies: List<String>.from(map['technologies'] as List),
+      technologies: map['technologies'] != null
+          ? List<String>.from(map['technologies'] as List)
+          : <String>[],
       website: map['website'] as String?,
     );
   }
