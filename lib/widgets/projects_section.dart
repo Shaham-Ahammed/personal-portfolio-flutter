@@ -1426,28 +1426,28 @@ class _MiniProjectCardState extends State<_MiniProjectCard>
                 boxShadow: [
                   // Multiple layered shadows for neon glow effect
                   BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.8 * glowIntensity),
+                    color: AppColors.primary.withValues(alpha: 0.6 * glowIntensity),
                     blurRadius: 8 * glowIntensity,
                     spreadRadius: 2 * glowIntensity,
                   ),
                   BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.6 * glowIntensity),
+                    color: AppColors.primary.withValues(alpha: 0.45 * glowIntensity),
                     blurRadius: 16 * glowIntensity,
                     spreadRadius: 1 * glowIntensity,
                   ),
                   BoxShadow(
-                    color: AppColors.primaryLight.withValues(alpha: 0.7 * glowIntensity),
+                    color: AppColors.primaryLight.withValues(alpha: 0.5 * glowIntensity),
                     blurRadius: 24 * glowIntensity,
                     spreadRadius: 0.5 * glowIntensity,
                   ),
                   BoxShadow(
-                    color: AppColors.primaryLight.withValues(alpha: 0.5 * glowIntensity),
+                    color: AppColors.primaryLight.withValues(alpha: 0.35 * glowIntensity),
                     blurRadius: 32 * glowIntensity,
                     spreadRadius: 0 * glowIntensity,
                   ),
                   // Elevation shadow
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.3 * glowIntensity),
+                    color: Colors.black.withValues(alpha: 0.25 * glowIntensity),
                     blurRadius: 40 * glowIntensity,
                     spreadRadius: 0,
                     offset: Offset(0, 10 * glowIntensity),
