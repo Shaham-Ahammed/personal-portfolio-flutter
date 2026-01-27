@@ -325,12 +325,12 @@ class _CursorGlowPainter extends CustomPainter {
     final paint = Paint()
       ..shader = RadialGradient(
         colors: [
-          const Color(0xFFA78BFA).withValues(alpha: 0.12),
-          const Color(0xFFC4B5FD).withValues(alpha: 0.07),
-          const Color(0xFFDDD6FE).withValues(alpha: 0.03),
+          const Color(0xFF818CF8).withValues(alpha: 0.18), // Primary Light
+          const Color(0xFF6366F1).withValues(alpha: 0.10), // Primary (Indigo)
+          const Color(0xFF4F46E5).withValues(alpha: 0.04), // Primary Dark
           Colors.transparent,
         ],
-        stops: const [0.0, 0.3, 0.6, 1.0],
+        stops: const [0.0, 0.35, 0.7, 1.0],
       ).createShader(
         Rect.fromCircle(center: cursorPosition, radius: radius),
       );
