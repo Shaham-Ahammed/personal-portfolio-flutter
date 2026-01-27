@@ -16,8 +16,8 @@ I love problem solving and breaking down complex challenges into simple, practic
   static const String aboutGifPath =
       'https://user-images.githubusercontent.com/74038190/241765440-80728820-e06b-4f96-9c9e-9df46f0cc0a5.gif';
   // Contact Information
-  static const String email = 'your.email@example.com';
-  static const String phone = '+1 (555) 123-4567';
+  static const String email = 'shahamahammed66@gmail.com';
+  static const String phone = '+91 9961628586';
   static const String location = 'Your City, Country';
 
   // Social Media Links
