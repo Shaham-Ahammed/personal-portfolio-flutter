@@ -2,23 +2,61 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:simple_icons/simple_icons.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 import '../constants/colors.dart';
 import '../constants/text_styles.dart';
 import '../constants/portfolio_data.dart';
 
 class ContactSection extends StatefulWidget {
-  const ContactSection({super.key});
+  final Function(VoidCallback)? onRegisterReset;
+  
+  const ContactSection({super.key, this.onRegisterReset});
 
   @override
   State<ContactSection> createState() => _ContactSectionState();
 }
 
-class _ContactSectionState extends State<ContactSection> {
+class _ContactSectionState extends State<ContactSection>
+    with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _messageController = TextEditingController();
   bool _isSending = false;
+  
+  late AnimationController _socialIconsController;
+  bool _hasAnimated = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _socialIconsController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    );
+    
+    // Register reset callback with parent
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && widget.onRegisterReset != null) {
+        widget.onRegisterReset!(resetAnimations);
+      }
+    });
+  }
+
+  void resetAnimations() {
+    setState(() {
+      _hasAnimated = false;
+    });
+    _socialIconsController.reset();
+  }
+
+  void _onVisibilityChanged(VisibilityInfo info) {
+    // Start animation when at least 30% of the widget is visible
+    if (info.visibleFraction > 0.3 && !_hasAnimated && mounted) {
+      _socialIconsController.forward();
+      _hasAnimated = true;
+    }
+  }
 
   Future<void> _launchUrl(String url) async {
     final Uri uri = Uri.parse(url);
@@ -105,7 +143,78 @@ class _ContactSectionState extends State<ContactSection> {
     _nameController.dispose();
     _emailController.dispose();
     _messageController.dispose();
+    _socialIconsController.dispose();
     super.dispose();
+  }
+
+  List<Widget> _buildAnimatedSocialIcons() {
+    final socialIcons = <Map<String, dynamic>>[
+      if (PortfolioData.githubUrl.isNotEmpty)
+        {
+          'icon': SimpleIcons.github,
+          'color': const Color(0xFF181717),
+          'url': PortfolioData.githubUrl,
+        },
+      if (PortfolioData.linkedinUrl.isNotEmpty)
+        {
+          'icon': FontAwesomeIcons.linkedin,
+          'color': const Color(0xFF0A66C2),
+          'url': PortfolioData.linkedinUrl,
+        },
+      if (PortfolioData.instagramUrl.isNotEmpty)
+        {
+          'icon': SimpleIcons.instagram,
+          'color': const Color(0xFFE4405F),
+          'url': PortfolioData.instagramUrl,
+        },
+      if (PortfolioData.leetcodeUrl.isNotEmpty)
+        {
+          'icon': SimpleIcons.leetcode,
+          'color': const Color(0xFFFFA116),
+          'url': PortfolioData.leetcodeUrl,
+        },
+      if (PortfolioData.whatsappUrl.isNotEmpty)
+        {
+          'icon': SimpleIcons.whatsapp,
+          'color': const Color(0xFF25D366),
+          'url': PortfolioData.whatsappUrl,
+        },
+    ];
+
+    return List.generate(socialIcons.length, (index) {
+      // Stagger each icon's animation
+      final startInterval = index * 0.15;
+      final endInterval = startInterval + 0.4;
+      
+      final animation = CurvedAnimation(
+        parent: _socialIconsController,
+        curve: Interval(
+          startInterval.clamp(0.0, 1.0),
+          endInterval.clamp(0.0, 1.0),
+          curve: Curves.easeOutBack,
+        ),
+      );
+
+      return AnimatedBuilder(
+        animation: animation,
+        builder: (context, child) {
+          // Clamp opacity to valid range (easeOutBack can overshoot)
+          final clampedOpacity = animation.value.clamp(0.0, 1.0);
+          return Transform.translate(
+            offset: Offset(0, -50 * (1 - animation.value)),
+            child: Opacity(
+              opacity: clampedOpacity,
+              child: child,
+            ),
+          );
+        },
+        child: _SocialIconButton(
+          icon: socialIcons[index]['icon'] as IconData,
+          brandColor: socialIcons[index]['color'] as Color,
+          onTap: () => _launchUrl(socialIcons[index]['url'] as String),
+        ),
+      );
+    });
   }
 
   @override
@@ -134,7 +243,7 @@ class _ContactSectionState extends State<ContactSection> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('CONTACT', style: AppTextStyles.sectionTitle(context)),
+                Text('CONTACT ME', style: AppTextStyles.sectionTitle(context)),
                 const SizedBox(height: 16),
                 Text(
                   'Let\'s Get In Touch',
@@ -184,41 +293,14 @@ class _ContactSectionState extends State<ContactSection> {
               ),
               const SizedBox(height: 24),
               // Social Media Icons
-              Wrap(
-                spacing: 16,
-                runSpacing: 16,
-                children: [
-                  if (PortfolioData.githubUrl.isNotEmpty)
-                    _SocialIconButton(
-                      icon: SimpleIcons.github,
-                      brandColor: const Color(0xFF181717), // GitHub black
-                      onTap: () => _launchUrl(PortfolioData.githubUrl),
-                    ),
-                  if (PortfolioData.linkedinUrl.isNotEmpty)
-                    _SocialIconButton(
-                      icon: FontAwesomeIcons.linkedin,
-                      brandColor: const Color(0xFF0A66C2), // LinkedIn blue
-                      onTap: () => _launchUrl(PortfolioData.linkedinUrl),
-                    ),
-                  if (PortfolioData.instagramUrl.isNotEmpty)
-                    _SocialIconButton(
-                      icon: SimpleIcons.instagram,
-                      brandColor: const Color(0xFFE4405F), // Instagram pink
-                      onTap: () => _launchUrl(PortfolioData.instagramUrl),
-                    ),
-                  if (PortfolioData.leetcodeUrl.isNotEmpty)
-                    _SocialIconButton(
-                      icon: SimpleIcons.leetcode,
-                      brandColor: const Color(0xFFFFA116), // LeetCode orange
-                      onTap: () => _launchUrl(PortfolioData.leetcodeUrl),
-                    ),
-                  if (PortfolioData.whatsappUrl.isNotEmpty)
-                    _SocialIconButton(
-                      icon: SimpleIcons.whatsapp,
-                      brandColor: const Color(0xFF25D366), // WhatsApp green
-                      onTap: () => _launchUrl(PortfolioData.whatsappUrl),
-                    ),
-                ],
+              VisibilityDetector(
+                key: const Key('social-icons-desktop'),
+                onVisibilityChanged: _onVisibilityChanged,
+                child: Wrap(
+                  spacing: 16,
+                  runSpacing: 16,
+                  children: _buildAnimatedSocialIcons(),
+                ),
               ),
             ],
           ),
@@ -253,42 +335,15 @@ class _ContactSectionState extends State<ContactSection> {
         ),
         const SizedBox(height: 24),
         // Social Media Icons
-        Wrap(
-          spacing: 16,
-          runSpacing: 16,
-          alignment: WrapAlignment.center,
-          children: [
-            if (PortfolioData.githubUrl.isNotEmpty)
-              _SocialIconButton(
-                icon: SimpleIcons.github,
-                brandColor: const Color(0xFF181717), // GitHub black
-                onTap: () => _launchUrl(PortfolioData.githubUrl),
-              ),
-            if (PortfolioData.linkedinUrl.isNotEmpty)
-              _SocialIconButton(
-                icon: FontAwesomeIcons.linkedin,
-                brandColor: const Color(0xFF0A66C2), // LinkedIn blue
-                onTap: () => _launchUrl(PortfolioData.linkedinUrl),
-              ),
-            if (PortfolioData.instagramUrl.isNotEmpty)
-              _SocialIconButton(
-                icon: SimpleIcons.instagram,
-                brandColor: const Color(0xFFE4405F), // Instagram pink
-                onTap: () => _launchUrl(PortfolioData.instagramUrl),
-              ),
-            if (PortfolioData.leetcodeUrl.isNotEmpty)
-              _SocialIconButton(
-                icon: SimpleIcons.leetcode,
-                brandColor: const Color(0xFFFFA116), // LeetCode orange
-                onTap: () => _launchUrl(PortfolioData.leetcodeUrl),
-              ),
-            if (PortfolioData.whatsappUrl.isNotEmpty)
-              _SocialIconButton(
-                icon: SimpleIcons.whatsapp,
-                brandColor: const Color(0xFF25D366), // WhatsApp green
-                onTap: () => _launchUrl(PortfolioData.whatsappUrl),
-              ),
-          ],
+        VisibilityDetector(
+          key: const Key('social-icons-mobile'),
+          onVisibilityChanged: _onVisibilityChanged,
+          child: Wrap(
+            spacing: 16,
+            runSpacing: 16,
+            alignment: WrapAlignment.center,
+            children: _buildAnimatedSocialIcons(),
+          ),
         ),
         const SizedBox(height: 40),
         // Contact Form
@@ -311,6 +366,7 @@ class _ContactSectionState extends State<ContactSection> {
             // Name field
             TextFormField(
               controller: _nameController,
+              autovalidateMode: AutovalidateMode.onUnfocus,
               decoration: InputDecoration(
                 labelText: 'Name',
                 hintText: 'Your name',
@@ -344,6 +400,7 @@ class _ContactSectionState extends State<ContactSection> {
             // Email field
             TextFormField(
               controller: _emailController,
+              autovalidateMode: AutovalidateMode.onUnfocus,
               decoration: InputDecoration(
                 labelText: 'Email',
                 hintText: 'your.email@example.com',
@@ -371,8 +428,12 @@ class _ContactSectionState extends State<ContactSection> {
                 if (value == null || value.trim().isEmpty) {
                   return 'Please enter your email';
                 }
-                if (!value.contains('@')) {
-                  return 'Please enter a valid email';
+                // RFC 5322 compliant email regex
+                final emailRegex = RegExp(
+                  r'^[a-zA-Z0-9.!#$%&*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$',
+                );
+                if (!emailRegex.hasMatch(value.trim())) {
+                  return 'Please enter a valid email address';
                 }
                 return null;
               },
@@ -381,6 +442,7 @@ class _ContactSectionState extends State<ContactSection> {
             // Message field
             TextFormField(
               controller: _messageController,
+              autovalidateMode: AutovalidateMode.onUnfocus,
               decoration: InputDecoration(
                 labelText: 'Message',
                 hintText: 'Your message...',

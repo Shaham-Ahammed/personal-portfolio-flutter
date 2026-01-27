@@ -24,6 +24,7 @@ class _PortfolioScreenState extends State<PortfolioScreen>
   // Callbacks to reset animations
   VoidCallback? _resetProjectsAnimations;
   VoidCallback? _resetExperienceAnimations;
+  VoidCallback? _resetContactAnimations;
 
   @override
   void initState() {
@@ -82,6 +83,7 @@ class _PortfolioScreenState extends State<PortfolioScreen>
           // Reset animations when home section becomes visible
           _resetProjectsAnimations?.call();
           _resetExperienceAnimations?.call();
+          _resetContactAnimations?.call();
         } else if (!isVisible && _homeSectionVisible && mounted) {
           setState(() {
             _homeSectionVisible = false;
@@ -181,7 +183,11 @@ class _PortfolioScreenState extends State<PortfolioScreen>
                 ),
                 SizedBox(
                   // height: MediaQuery.of(context).size.height,
-                  child: const ContactSection(),
+                  child: ContactSection(
+                    onRegisterReset: (resetCallback) {
+                      _resetContactAnimations = resetCallback;
+                    },
+                  ),
                 ),
               ],
             ),
