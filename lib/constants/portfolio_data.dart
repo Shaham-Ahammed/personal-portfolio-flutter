@@ -21,10 +21,10 @@ I love problem solving and breaking down complex challenges into simple, practic
   static const String location = 'Your City, Country';
 
   // Social Media Links
-  static const String githubUrl = 'https://github.com/yourusername';
-  static const String linkedinUrl = 'https://linkedin.com/in/yourusername';
-  static const String instagramUrl = 'https://instagram.com/yourusername';
-  static const String leetcodeUrl = 'https://leetcode.com/yourusername';
+  static const String githubUrl = 'https://github.com/Shaham-Ahammed';
+  static const String linkedinUrl = 'https://www.linkedin.com/in/shaham-ahammed-p-k-5a126b290/';
+  static const String instagramUrl = 'https://www.instagram.com/___.shaham.___?igsh=MWFpcTZjNXZvbTJxMA%3D%3D';
+  static const String leetcodeUrl = 'https://leetcode.com/u/Shaham_Ahammed/';
   static const String whatsappUrl = 'https://wa.me/919961628586'; // WhatsApp with country code
 
   // Skills

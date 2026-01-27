@@ -19,6 +19,10 @@ class _PortfolioScreenState extends State<PortfolioScreen>
   final ScrollController _scrollController = ScrollController();
   int _currentSection = 0;
   final GlobalKey _homeSectionKey = GlobalKey();
+  final GlobalKey _aboutSectionKey = GlobalKey();
+  final GlobalKey _projectsSectionKey = GlobalKey();
+  final GlobalKey _experienceSectionKey = GlobalKey();
+  final GlobalKey _contactSectionKey = GlobalKey();
   bool _homeSectionVisible = false;
   
   // Callbacks to reset animations
@@ -105,12 +109,8 @@ class _PortfolioScreenState extends State<PortfolioScreen>
   void _onScroll() {
     if (!_scrollController.hasClients) return;
 
-    final double scrollPosition = _scrollController.offset;
-    final double screenHeight = MediaQuery.of(context).size.height;
-
-    // Determine current section based on scroll position
-    int newSection = (scrollPosition / screenHeight).round();
-    newSection = newSection.clamp(0, 4);
+    // Determine current section based on which section is most visible
+    final int newSection = _calculateCurrentSection();
 
     if (newSection != _currentSection) {
       setState(() {
@@ -126,15 +126,88 @@ class _PortfolioScreenState extends State<PortfolioScreen>
     });
   }
 
-  void _scrollToSection(int sectionIndex) {
-    final double screenHeight = MediaQuery.of(context).size.height;
-    final double targetOffset = sectionIndex * screenHeight;
+  int _calculateCurrentSection() {
+    final sectionKeys = [
+      _homeSectionKey,
+      _aboutSectionKey,
+      _projectsSectionKey,
+      _experienceSectionKey,
+      _contactSectionKey,
+    ];
 
-    _scrollController.animateTo(
-      targetOffset,
-      duration: const Duration(milliseconds: 800),
-      curve: Curves.easeInOut,
-    );
+    final screenHeight = MediaQuery.of(context).size.height;
+    final viewportCenter = screenHeight / 2;
+    
+    int closestSection = 0;
+    double closestDistance = double.infinity;
+
+    for (int i = 0; i < sectionKeys.length; i++) {
+      final key = sectionKeys[i];
+      final context = key.currentContext;
+      if (context == null) continue;
+
+      final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
+      if (renderBox == null || !renderBox.hasSize) continue;
+
+      try {
+        final position = renderBox.localToGlobal(Offset.zero);
+        final sectionTop = position.dy;
+        final sectionHeight = renderBox.size.height;
+        final sectionCenter = sectionTop + (sectionHeight / 2);
+        
+        // Calculate distance from section center to viewport center
+        final distance = (sectionCenter - viewportCenter).abs();
+        
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closestSection = i;
+        }
+      } catch (e) {
+        // Silently handle errors
+      }
+    }
+
+    return closestSection;
+  }
+
+  void _scrollToSection(int sectionIndex) {
+    final sectionKeys = [
+      _homeSectionKey,
+      _aboutSectionKey,
+      _projectsSectionKey,
+      _experienceSectionKey,
+      _contactSectionKey,
+    ];
+
+    if (sectionIndex < 0 || sectionIndex >= sectionKeys.length) return;
+
+    final key = sectionKeys[sectionIndex];
+    final context = key.currentContext;
+    if (context == null) return;
+
+    final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
+    if (renderBox == null) return;
+
+    try {
+      final position = renderBox.localToGlobal(Offset.zero);
+      final scrollOffset = _scrollController.offset;
+      final targetOffset = scrollOffset + position.dy;
+
+      _scrollController.animateTo(
+        targetOffset,
+        duration: const Duration(milliseconds: 800),
+        curve: Curves.easeInOut,
+      );
+    } catch (e) {
+      // Fallback to old method
+      final double screenHeight = MediaQuery.of(this.context).size.height;
+      final double targetOffset = sectionIndex * screenHeight;
+      _scrollController.animateTo(
+        targetOffset,
+        duration: const Duration(milliseconds: 800),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 
   @override
@@ -158,15 +231,16 @@ class _PortfolioScreenState extends State<PortfolioScreen>
             child: Column(
               children: [
                 SizedBox(
+                  key: _homeSectionKey,
                   height: MediaQuery.of(context).size.height,
-                  child: HomeSection(key: _homeSectionKey),
+                  child: const HomeSection(),
                 ),
                 SizedBox(
-                  // height: MediaQuery.of(context).size.height,
+                  key: _aboutSectionKey,
                   child: const AboutSection(),
                 ),
                 SizedBox(
-                  // height: MediaQuery.of(context).size.height,
+                  key: _projectsSectionKey,
                   child: ProjectsSection(
                     onRegisterReset: (resetCallback) {
                       _resetProjectsAnimations = resetCallback;
@@ -174,7 +248,7 @@ class _PortfolioScreenState extends State<PortfolioScreen>
                   ),
                 ),
                 SizedBox(
-                  // height: MediaQuery.of(context).size.height,
+                  key: _experienceSectionKey,
                   child: ExperienceSection(
                     onRegisterReset: (resetCallback) {
                       _resetExperienceAnimations = resetCallback;
@@ -182,7 +256,7 @@ class _PortfolioScreenState extends State<PortfolioScreen>
                   ),
                 ),
                 SizedBox(
-                  // height: MediaQuery.of(context).size.height,
+                  key: _contactSectionKey,
                   child: ContactSection(
                     onRegisterReset: (resetCallback) {
                       _resetContactAnimations = resetCallback;
