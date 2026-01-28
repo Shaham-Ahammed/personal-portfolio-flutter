@@ -61,48 +61,39 @@ class _PortfolioScreenState extends State<PortfolioScreen>
 
   void _checkHomeSectionVisibility() {
     if (!mounted) return;
-
-    final context = _homeSectionKey.currentContext;
-    if (context == null || !context.mounted) return;
-
-    final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
-    if (renderBox == null || !renderBox.hasSize) return;
+    if (!_scrollController.hasClients) return;
 
     try {
-      final position = renderBox.localToGlobal(Offset.zero);
-      final widgetSize = renderBox.size;
       final screenSize = MediaQuery.of(context).size;
       final screenHeight = screenSize.height;
+      final isMobile = screenSize.width < 768;
+      
+      // Use scroll offset to determine home section visibility
+      // Home section is visible when scroll offset is near 0
+      final scrollOffset = _scrollController.offset;
+      
+      // Calculate how much of the screen is showing the home section
+      // When scrollOffset = 0, home is 100% visible
+      // When scrollOffset >= screenHeight, home is 0% visible
+      final homeVisibilityPercentage = 1.0 - (scrollOffset / screenHeight).clamp(0.0, 1.0);
+      
+      // Use lower threshold for mobile (85%) to account for nav bar, etc.
+      final visibilityThreshold = isMobile ? 0.85 : 0.95;
+      final isVisible = homeVisibilityPercentage >= visibilityThreshold;
 
-      final viewportTop = 0.0;
-      final viewportBottom = screenHeight;
-
-      final widgetTop = position.dy;
-      final widgetBottom = widgetTop + widgetSize.height;
-
-      final visibleTop = widgetTop.clamp(viewportTop, viewportBottom);
-      final visibleBottom = widgetBottom.clamp(viewportTop, viewportBottom);
-      final visibleHeight = (visibleBottom - visibleTop).clamp(0.0, widgetSize.height);
-
-      if (widgetSize.height > 0) {
-        final visibilityPercentage = visibleHeight / widgetSize.height;
-        final isInViewport = widgetBottom > viewportTop && widgetTop < viewportBottom;
-        final isVisible = isInViewport && visibilityPercentage >=1; // 100% visible
-
-        if (isVisible && !_homeSectionVisible && mounted) {
-          setState(() {
-            _homeSectionVisible = true;
-          });
-          // Reset animations when home section becomes visible
-          _resetAboutAnimations?.call();
-          _resetProjectsAnimations?.call();
-          _resetExperienceAnimations?.call();
-          _resetContactAnimations?.call();
-        } else if (!isVisible && _homeSectionVisible && mounted) {
-          setState(() {
-            _homeSectionVisible = false;
-          });
-        }
+      if (isVisible && !_homeSectionVisible && mounted) {
+        setState(() {
+          _homeSectionVisible = true;
+        });
+        // Reset animations when home section becomes visible
+        _resetAboutAnimations?.call();
+        _resetProjectsAnimations?.call();
+        _resetExperienceAnimations?.call();
+        _resetContactAnimations?.call();
+      } else if (!isVisible && _homeSectionVisible && mounted) {
+        setState(() {
+          _homeSectionVisible = false;
+        });
       }
     } catch (e) {
       // Silently handle errors

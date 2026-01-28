@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:simple_icons/simple_icons.dart';
@@ -227,10 +228,19 @@ class _ContactSectionState extends State<ContactSection>
       decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
       child: Stack(
         children: [
-          // Tilted background shape
+          // Tilted background shape - desktop
           if (!isMobile)
             Positioned.fill(
               child: CustomPaint(painter: _TiltedBackgroundPainter()),
+            ),
+          // Tilted background shape - mobile (positioned for form area)
+          if (isMobile)
+            Positioned(
+              left: 0,
+              right: 0,
+              top: 235, // Position where the form starts (after title, subtitle, description, spacing)
+              height:kIsWeb? 320: 430, // Approximate form height
+              child: CustomPaint(painter: _MobileFormBackgroundPainter()),
             ),
           // Content
           Padding(
@@ -307,7 +317,7 @@ class _ContactSectionState extends State<ContactSection>
         ),
         const SizedBox(width: 40),
         // Center: Contact Form
-        Expanded(flex: 2, child: Center(child: _buildContactForm(context))),
+        Expanded(flex: 2, child: Center(child: _buildContactForm(context, isMobile: false))),
         const SizedBox(width: 40),
         // Right side: Empty space for balance
         const Expanded(child: SizedBox()),
@@ -316,45 +326,92 @@ class _ContactSectionState extends State<ContactSection>
   }
 
   Widget _buildMobileLayout(BuildContext context) {
+    // Check if it's a real mobile device (not web)
+    final isRealMobile = !kIsWeb;
+    
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Email tile
+        // Contact Form first on mobile (tilted background is in main Stack)
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: _buildContactForm(context, isMobile: true),
+        ),
+        const SizedBox(height: 40),
+        // Email tile - always expanded only on real mobile devices
         _ExpandableContactTile(
           icon: Icons.email,
           label: 'Email',
           value: PortfolioData.email,
           onTap: () => _launchEmail(PortfolioData.email),
+          isRealMobile: isRealMobile,
         ),
         const SizedBox(height: 16),
-        // Phone tile
+        // Phone tile - always expanded only on real mobile devices
         _ExpandableContactTile(
           icon: Icons.phone,
           label: 'Phone',
           value: PortfolioData.phone,
           onTap: () => _launchPhone(PortfolioData.phone),
+          isRealMobile: isRealMobile,
         ),
         const SizedBox(height: 24),
-        // Social Media Icons
+        // Social Media Icons - aligned to start
         VisibilityDetector(
           key: const Key('social-icons-mobile'),
           onVisibilityChanged: _onVisibilityChanged,
           child: Wrap(
             spacing: 16,
             runSpacing: 16,
-            alignment: WrapAlignment.center,
+            alignment: WrapAlignment.start,
             children: _buildAnimatedSocialIcons(),
           ),
         ),
-        const SizedBox(height: 40),
-        // Contact Form
-        Center(child: _buildContactForm(context)),
       ],
     );
   }
 
-  Widget _buildContactForm(BuildContext context) {
+  Widget _buildContactForm(BuildContext context, {bool isMobile = false}) {
     final size = MediaQuery.of(context).size;
     final maxWidth = size.width < 768 ? double.infinity : 500.0;
+    
+    // Smaller text style for mobile
+    final fieldTextStyle = isMobile 
+        ? AppTextStyles.bodySmall(context)
+        : AppTextStyles.bodyMedium(context);
+    final fieldSpacing = isMobile ? 14.0 : 20.0;
+    final contentPadding = isMobile 
+        ? const EdgeInsets.symmetric(horizontal: 12, vertical: 12)
+        : null;
+    
+    // Border styles - outlined for mobile, underline for desktop
+    final borderRadius = BorderRadius.circular(10);
+    final border = isMobile 
+        ? OutlineInputBorder(
+            borderRadius: borderRadius,
+            borderSide: BorderSide(
+              color: AppColors.primary.withValues(alpha: 0.3),
+            ),
+          )
+        : UnderlineInputBorder(
+            borderSide: BorderSide(
+              color: AppColors.primary.withValues(alpha: 0.3),
+            ),
+          );
+    final focusedBorder = isMobile
+        ? OutlineInputBorder(
+            borderRadius: borderRadius,
+            borderSide: const BorderSide(
+              color: AppColors.primaryLight,
+              width: 2,
+            ),
+          )
+        : const UnderlineInputBorder(
+            borderSide: BorderSide(
+              color: AppColors.primaryLight,
+              width: 2,
+            ),
+          );
 
     return SizedBox(
       width: maxWidth,
@@ -370,25 +427,16 @@ class _ContactSectionState extends State<ContactSection>
               decoration: InputDecoration(
                 labelText: 'Name',
                 hintText: 'Your name',
-                border: UnderlineInputBorder(
-                  borderSide: BorderSide(
-                    color: AppColors.primary.withValues(alpha: 0.3),
-                  ),
-                ),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(
-                    color: AppColors.primary.withValues(alpha: 0.3),
-                  ),
-                ),
-                focusedBorder: const UnderlineInputBorder(
-                  borderSide: BorderSide(
-                    color: AppColors.primaryLight,
-                    width: 2,
-                  ),
-                ),
-                labelStyle: AppTextStyles.bodyMedium(context),
+                isDense: isMobile,
+                contentPadding: contentPadding,
+                border: border,
+                enabledBorder: border,
+                focusedBorder: focusedBorder,
+                labelStyle: fieldTextStyle,
+                filled: isMobile,
+                fillColor: isMobile ? AppColors.background.withValues(alpha: 0.5) : null,
               ),
-              style: AppTextStyles.bodyMedium(context),
+              style: fieldTextStyle,
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
                   return 'Please enter your name';
@@ -396,7 +444,7 @@ class _ContactSectionState extends State<ContactSection>
                 return null;
               },
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: fieldSpacing),
             // Email field
             TextFormField(
               controller: _emailController,
@@ -404,25 +452,16 @@ class _ContactSectionState extends State<ContactSection>
               decoration: InputDecoration(
                 labelText: 'Email',
                 hintText: 'your.email@example.com',
-                border: UnderlineInputBorder(
-                  borderSide: BorderSide(
-                    color: AppColors.primary.withValues(alpha: 0.3),
-                  ),
-                ),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(
-                    color: AppColors.primary.withValues(alpha: 0.3),
-                  ),
-                ),
-                focusedBorder: const UnderlineInputBorder(
-                  borderSide: BorderSide(
-                    color: AppColors.primaryLight,
-                    width: 2,
-                  ),
-                ),
-                labelStyle: AppTextStyles.bodyMedium(context),
+                isDense: isMobile,
+                contentPadding: contentPadding,
+                border: border,
+                enabledBorder: border,
+                focusedBorder: focusedBorder,
+                labelStyle: fieldTextStyle,
+                filled: isMobile,
+                fillColor: isMobile ? AppColors.background.withValues(alpha: 0.5) : null,
               ),
-              style: AppTextStyles.bodyMedium(context),
+              style: fieldTextStyle,
               keyboardType: TextInputType.emailAddress,
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
@@ -438,7 +477,7 @@ class _ContactSectionState extends State<ContactSection>
                 return null;
               },
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: fieldSpacing),
             // Message field
             TextFormField(
               controller: _messageController,
@@ -446,26 +485,17 @@ class _ContactSectionState extends State<ContactSection>
               decoration: InputDecoration(
                 labelText: 'Message',
                 hintText: 'Your message...',
-                border: UnderlineInputBorder(
-                  borderSide: BorderSide(
-                    color: AppColors.primary.withValues(alpha: 0.3),
-                  ),
-                ),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(
-                    color: AppColors.primary.withValues(alpha: 0.3),
-                  ),
-                ),
-                focusedBorder: const UnderlineInputBorder(
-                  borderSide: BorderSide(
-                    color: AppColors.primaryLight,
-                    width: 2,
-                  ),
-                ),
-                labelStyle: AppTextStyles.bodyMedium(context),
+                isDense: isMobile,
+                contentPadding: contentPadding,
+                border: border,
+                enabledBorder: border,
+                focusedBorder: focusedBorder,
+                labelStyle: fieldTextStyle,
+                filled: isMobile,
+                fillColor: isMobile ? AppColors.background.withValues(alpha: 0.5) : null,
               ),
-              style: AppTextStyles.bodyMedium(context),
-              maxLines: 4,
+              style: fieldTextStyle,
+              maxLines: isMobile ? 3 : 4,
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
                   return 'Please enter a message';
@@ -473,7 +503,7 @@ class _ContactSectionState extends State<ContactSection>
                 return null;
               },
             ),
-            const SizedBox(height: 30),
+            SizedBox(height: isMobile ? 20 : 30),
             // Send button
             _HoverButton(
               onPressed: _isSending ? null : _sendEmail,
@@ -488,7 +518,7 @@ class _ContactSectionState extends State<ContactSection>
                     )
                   : Text(
                       'Send Message',
-                      style: AppTextStyles.bodyMedium(context).copyWith(
+                      style: (isMobile ? AppTextStyles.bodySmall(context) : AppTextStyles.bodyMedium(context)).copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.w600,
                       ),
@@ -506,12 +536,14 @@ class _ExpandableContactTile extends StatefulWidget {
   final String value;
   final String label;
   final VoidCallback? onTap;
+  final bool isRealMobile;
 
   const _ExpandableContactTile({
     required this.icon,
     required this.value,
     required this.label,
     this.onTap,
+    this.isRealMobile = false,
   });
 
   @override
@@ -540,6 +572,11 @@ class _ExpandableContactTileState extends State<_ExpandableContactTile>
       duration: const Duration(milliseconds: 2000),
       vsync: this,
     );
+    
+    // On real mobile device, start in expanded state
+    if (widget.isRealMobile) {
+      _expandController.value = 1.0;
+    }
   }
 
   @override
@@ -550,11 +587,15 @@ class _ExpandableContactTileState extends State<_ExpandableContactTile>
   }
 
   void _onHoverStart() {
+    // On real mobile device, always stay expanded
+    if (widget.isRealMobile) return;
     _expandController.forward();
     _rotationController.repeat();
   }
 
   void _onHoverEnd() {
+    // On real mobile device, always stay expanded
+    if (widget.isRealMobile) return;
     _expandController.reverse();
     _rotationController.stop();
     _rotationController.reset();
@@ -569,6 +610,58 @@ class _ExpandableContactTileState extends State<_ExpandableContactTile>
 
     // Colors for the chasing border effect
     const Color bgColor = Color(0xFF1E293B); // Same as surface/background
+
+    // On real mobile device, always show expanded with full width
+    if (widget.isRealMobile) {
+      return GestureDetector(
+        onTap: widget.onTap,
+        child: Container(
+          width: double.infinity, // Full width for consistent sizing
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(borderRadius),
+            border: Border.all(
+              color: AppColors.primary.withValues(alpha: 0.3),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(
+                widget.icon,
+                color: AppColors.primaryLight,
+                size: 20,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      widget.label,
+                      style: AppTextStyles.bodySmall(context).copyWith(
+                        color: AppColors.textSecondary,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      widget.value,
+                      style: AppTextStyles.bodySmall(context).copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     return MouseRegion(
       onEnter: (_) => _onHoverStart(),
@@ -836,6 +929,40 @@ class _TiltedBackgroundPainter extends CustomPainter {
     path.close();
 
     canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _MobileFormBackgroundPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Light primary color for fill
+    final fillPaint = Paint()
+      ..color = const Color.fromARGB(255, 82, 76, 145).withValues(alpha: .16)
+      ..style = PaintingStyle.fill;
+
+    // Create the tilted shape path - tilt from left to right
+    final path = Path();
+    
+    // Start from top left (slightly down)
+    path.moveTo(0,  0);
+    
+    // Go diagonally to top right (higher)
+    path.lineTo(size.width, 30);
+    
+    // Go down to bottom right
+    path.lineTo(size.width, size.height * 1);
+    
+    // Go diagonally to bottom left (lower)
+    path.lineTo(0, size.height);
+    
+    // Close back to start
+    path.close();
+
+    // Draw the filled area only (no border)
+    canvas.drawPath(path, fillPaint);
   }
 
   @override

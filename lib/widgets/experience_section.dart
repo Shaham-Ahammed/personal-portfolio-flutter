@@ -329,8 +329,11 @@ class _ExperienceCardState extends State<_ExperienceCard>
     ]).animate(_animationController);
 
     // Stacking animation: slight rotation to create stacking effect
-    // Rotates 3-5 degrees based on index (all cards including last)
-    final stackingAngle = 3.0 + (widget.index * 0.5); // Slight increase per card
+    // Desktop: Rotates 3-5 degrees based on index (all cards including last)
+    // Mobile: Alternating tilt - even index = right (+), odd index = left (-)
+    final stackingAngle = widget.isMobile 
+        ? (widget.index.isEven ? 2.0 : -2.0) // Alternating tilt for mobile
+        : 3.0 + (widget.index * 0.5); // Progressive tilt for desktop
     _stackingAnimation = Tween<double>(
       begin: 0.0,
       end: stackingAngle,
@@ -704,16 +707,18 @@ class _ExperienceCardState extends State<_ExperienceCard>
 
   Widget _buildMobileCard(BuildContext context) {
     return AnimatedBuilder(
-      animation: _rotationAnimation,
+      animation: Listenable.merge([_rotationAnimation, _stackingAnimation]),
       builder: (context, child) {
         // Convert degrees to radians for rotation
         final rotationX = _rotationAnimation.value * (3.14159 / 180);
+        final stackingZ = _stackingAnimation.value * (3.14159 / 180);
         
         return Transform(
           alignment: Alignment.center,
           transform: Matrix4.identity()
             ..setEntry(3, 2, 0.001) // Perspective
-            ..rotateX(rotationX),
+            ..rotateX(rotationX) // Drop animation
+            ..rotateZ(stackingZ), // Alternating tilt based on index
           child: Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
