@@ -232,17 +232,29 @@ class _PortfolioScreenState extends State<PortfolioScreen>
   }
 
   void _scrollToSection(int sectionIndex) {
+    if (sectionIndex < 0 || sectionIndex > 4) return;
+    
+    // Special case for Home section - scroll to top
+    if (sectionIndex == 0) {
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 800),
+        curve: Curves.easeInOut,
+      );
+      return;
+    }
+    
     final sectionKeys = [
-      _homeSectionKey,
       _aboutSectionKey,
       _projectsSectionKey,
       _experienceSectionKey,
       _contactSectionKey,
     ];
 
-    if (sectionIndex < 0 || sectionIndex >= sectionKeys.length) return;
+    final keyIndex = sectionIndex - 1; // Adjust for Home being index 0
+    if (keyIndex < 0 || keyIndex >= sectionKeys.length) return;
 
-    final key = sectionKeys[sectionIndex];
+    final key = sectionKeys[keyIndex];
     final context = key.currentContext;
     if (context == null) return;
 
@@ -537,7 +549,7 @@ class _StackingSectionsScrollViewState extends State<_StackingSectionsScrollView
         onNotification: _onScrollNotification,
         child: SingleChildScrollView(
           controller: widget.scrollController,
-          physics: const BouncingScrollPhysics(),
+          physics: const ClampingScrollPhysics(),
           child: Column(
             children: [
               // Spacer for home section
