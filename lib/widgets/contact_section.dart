@@ -241,7 +241,7 @@ class _ContactSectionState extends State<ContactSection>
               left: 0,
               right: 0,
               top: 235, // Position where the form starts (after title, subtitle, description, spacing)
-              height:kIsWeb? 320: 430, // Approximate form height
+              height:kIsWeb? 320: 460, // Approximate form height
               child: CustomPaint(painter: _MobileFormBackgroundPainter()),
             ),
           // Content - Use AnimatedPadding for smooth keyboard transitions
@@ -395,7 +395,7 @@ class _ContactSectionState extends State<ContactSection>
         ? OutlineInputBorder(
             borderRadius: borderRadius,
             borderSide: BorderSide(
-              color: AppColors.primary.withValues(alpha: 0.3),
+              color: AppColors.primary.withValues(alpha: 0.55),
             ),
           )
         : UnderlineInputBorder(

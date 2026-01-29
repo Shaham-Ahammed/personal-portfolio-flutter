@@ -12,7 +12,7 @@ class PortfolioApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Personal Portfolio',
+      title: 'Shaham Ahammed | Flutter Developer',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,

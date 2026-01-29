@@ -80,7 +80,6 @@ I love problem solving and breaking down complex challenges into simple, practic
         'https://res.cloudinary.com/dilbmyvfv/image/upload/v1769072803/Screenshot_2026-01-22_at_11.28.44_AM_wswfun.png',
         'https://res.cloudinary.com/dilbmyvfv/image/upload/v1769072802/Screenshot_2026-01-22_at_11.29.17_AM_z6tbbp.png',
         'https://res.cloudinary.com/dilbmyvfv/image/upload/v1769072802/Screenshot_2026-01-22_at_11.38.32_AM_twaw7q.png',
-        'https://res.cloudinary.com/dilbmyvfv/image/upload/v1769072802/Screenshot_2026-01-22_at_11.30.26_AM_fhn8ed.png',
         'https://res.cloudinary.com/dilbmyvfv/image/upload/v1769072801/Screenshot_2026-01-22_at_11.39.22_AM_keehyz.png',
         'https://res.cloudinary.com/dilbmyvfv/image/upload/v1769072801/Screenshot_2026-01-22_at_11.38.54_AM_vyok9d.png',
         'https://res.cloudinary.com/dilbmyvfv/image/upload/v1769072801/Screenshot_2026-01-22_at_11.40.34_AM_srn64n.png',
