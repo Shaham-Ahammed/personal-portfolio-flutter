@@ -1,7 +1,7 @@
 // Portfolio data - customize this with your own information
 class PortfolioData {
   // Personal Information
-  static const String name = 'Shaham';
+  static const String name = 'Shaham Ahammed';
   static const String title = 'Software Developer';
   static const String profileImagePath =
       'assets/images/coding_boy.jpeg'; // Replace with your image path
